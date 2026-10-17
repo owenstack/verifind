@@ -6,7 +6,7 @@ import { betterAuth } from "better-auth";
 export interface AuthConfig {
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
-	CORS_ORIGIN: string;
+  NODE_ENV: string
 }
 
 export function createAuth(
@@ -14,20 +14,33 @@ export function createAuth(
 	database: Database,
 	desktopOrigins: readonly string[] = []
 ) {
+  const isDev = env.NODE_ENV === 'development'
 	return betterAuth({
 		database: drizzleAdapter(database, {
 			provider: "sqlite",
 			schema,
 		}),
-		trustedOrigins: [env.CORS_ORIGIN, ...desktopOrigins],
-		emailAndPassword: { enabled: true },
+		trustedOrigins: [
+			...desktopOrigins,
+			...(isDev
+				? [
+						"http://localhost:3000",
+						"http://localhost:3001",
+						"http://localhost:3002",
+					]
+				: []),
+		],
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,
 		advanced: {
 			defaultCookieAttributes: {
-				sameSite: "none",
-				secure: true,
+				sameSite: isDev ? "lax" : "none",
+				secure: !isDev,
 				httpOnly: true,
+			},
+			crossSubDomainCookies: {
+				enabled: !isDev,
+				domain: "verifind.efobi.dev",
 			},
 		},
 		plugins: [],

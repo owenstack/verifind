@@ -111,6 +111,21 @@ Alchemy creates a stage-specific Axiom dataset and a least-privilege ingest toke
 
 - Required after the first deploy: set `CORS_ORIGIN` in `apps/server/.env` to the exact deployed web origin, such as `https://app.example.com`, then deploy the server again.
 
+### GitHub Actions deployment
+
+`.github/workflows/deploy.yml` checks the `master` branch and deploys the `production` Alchemy stage after the checks pass. It can also be started manually from the Actions tab while `master` is selected. The deploy job uses the GitHub `production` environment, so configure the following values under **Settings → Environments → production**:
+
+| Type | Name | Purpose |
+| --- | --- | --- |
+| Secret | `ALCHEMY_PASSWORD` | Encrypts the Alchemy state. Use the same password for every deploy to this stage. |
+| Secret | `AXIOM_API_KEY` | Axiom credential allowed to manage the stack's dataset and ingest token. |
+| Secret | `BETTER_AUTH_SECRET` | Better Auth signing secret; use a random value with at least 32 characters. |
+| Secret | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with permissions for Workers, D1, and Pages assets in the target account. |
+| Variable | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account that owns the production resources. |
+| Variable | `CORS_ORIGIN` | Exact browser origin allowed to call the API, including scheme and any custom domain. |
+
+The Cloudflare and Axiom credentials are read directly from the environment in CI; no local Alchemy profile is needed. Protect the `production` environment with the repository's desired deployment reviewers and branch restrictions. Each successful deployment updates the same `production` stage and applies pending D1 migrations.
+
 ## Git Hooks and Formatting
 
 - Run checks: `bun run check`

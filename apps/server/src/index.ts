@@ -13,7 +13,6 @@ import {
 import { type EvlogVariables, evlog } from "evlog/hono";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-
 import { createContext } from "./context";
 import { ENV } from "./env.server";
 import { createAuth } from "./services";
@@ -41,7 +40,23 @@ app.use("*", async (c, next) => {
 app.use(
 	"/*",
 	cors({
-		origin: ENV.CORS_ORIGIN,
+		origin: (origin) => {
+			if (
+				ENV.NODE_ENV === "development" ||
+				(origin &&
+					(origin.includes("//localhost:") || origin.includes("//127.0.0.1:")))
+			) {
+				return origin;
+			}
+			if (
+				origin &&
+				(origin.endsWith(".verifind.efobi.dev") ||
+					origin === "https://verifind.efobi.dev")
+			) {
+				return origin;
+			}
+			return "https://verifind.efobi.dev";
+		},
 		allowMethods: ["GET", "POST", "OPTIONS"],
 		allowHeaders: ["Content-Type", "Authorization"],
 		credentials: true,

@@ -1,0 +1,74 @@
+name: Deploy production
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify application
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check formatting and lint
+        run: bun run check
+
+      - name: Build applications
+        run: bun run build
+
+      - name: Check TypeScript types
+        run: bun run check-types
+
+  deploy:
+    name: Deploy Cloudflare production stack
+    needs: verify
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
+      ALCHEMY_STATE_TOKEN: ${{secrets.ALCHEMY_STATE_TOKEN}}
+      AXIOM_API_KEY: ${{ secrets.AXIOM_API_KEY }}
+      BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
+      BETTER_AUTH_URL: https://api.verifind.efobi.dev
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      NODE_ENV: production
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Check Alchemy provider credentials
+        working-directory: packages/infra
+        run: bunx alchemy provider check-env --provider Cloudflare --provider Axiom
+
+      - name: Deploy production stage
+        working-directory: packages/infra
+        run: bunx alchemy deploy --stage production --yes
