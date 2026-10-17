@@ -12,8 +12,8 @@ export const db = Cloudflare.D1.Database("database", {
 	migrations: "../../packages/db/src/migrations",
 });
 
-const serverUrl = (url: string) =>
-	process.env.NODE_ENV === "production"
+const serverUrl = (url: string, stage: string) =>
+	stage === "prod" || stage === "production"
 		? "https://api.verifind.efobi.dev"
 		: url;
 
@@ -89,6 +89,7 @@ export default Alchemy.Stack(
 	Effect.gen(function* () {
 		const observabilityResources = yield* observability;
 		const serverWorker = yield* server;
+		const { stage } = yield* Alchemy.Stack;
 		const webWorker = yield* Cloudflare.Website.Vite("web", {
 			rootDir: "../../apps/web",
 			assets: {
@@ -96,7 +97,9 @@ export default Alchemy.Stack(
 				notFoundHandling: "single-page-application",
 			},
 			env: {
-				VITE_SERVER_URL: Output.map(serverWorker.url.as<string>(), serverUrl),
+				VITE_SERVER_URL: Output.map(serverWorker.url.as<string>(), (url) =>
+					serverUrl(url, stage)
+				),
 			},
 			dev: {
 				port: 3001,
