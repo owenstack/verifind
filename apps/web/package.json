@@ -5,12 +5,12 @@
   "type": "module",
   "scripts": {
     "build": "tsc -b ../../packages/api && vite build",
-    "serve": "vite preview",
-    "start": "vite",
     "check-types": "tsc -b ../../packages/api && vite build && tsc --noEmit",
-    "generate-pwa-assets": "pwa-assets-generator",
     "dev:bare": "vite dev",
-    "env:generate": "varlock codegen"
+    "env:generate": "varlock codegen",
+    "generate-pwa-assets": "pwa-assets-generator",
+    "serve": "vite preview",
+    "start": "vite"
   },
   "dependencies": {
     "@orpc/client": "catalog:",

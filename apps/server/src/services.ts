@@ -1,11 +1,11 @@
 import { createAuth as createConfiguredAuth } from "@verifind/auth";
-import { type Database, createDb } from "@verifind/db";
+import { createDb, type Database } from "@verifind/db";
 
 import { ENV } from "./env.server";
 
 export function getDb(): Database {
-  return createDb(ENV);
+	return createDb(ENV);
 }
 export async function createAuth(database?: Database) {
-  return createConfiguredAuth(ENV, database ?? (await getDb()));
+	return createConfiguredAuth(ENV, database ?? (await getDb()));
 }
