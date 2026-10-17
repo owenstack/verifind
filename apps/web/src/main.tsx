@@ -1,8 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { Spinner } from "@verifind/ui/components/spinner";
 import ReactDOM from "react-dom/client";
-
-import Loader from "./components/loader";
 import { routeTree } from "./routeTree.gen";
 import { orpc, queryClient } from "./utils/orpc";
 
@@ -10,7 +9,11 @@ const router = createRouter({
 	routeTree,
 	defaultPreload: "intent",
 	scrollRestoration: true,
-	defaultPendingComponent: () => <Loader />,
+	defaultPendingComponent: () => (
+		<div className="flex h-dvh flex-col items-center justify-center">
+			<Spinner />
+		</div>
+	),
 	context: { orpc, queryClient },
 	Wrap({ children }: { children: React.ReactNode }) {
 		return (

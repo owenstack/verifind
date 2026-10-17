@@ -2,6 +2,7 @@
 import * as Alchemy from "alchemy";
 import * as Axiom from "alchemy/Axiom";
 import * as Cloudflare from "alchemy/Cloudflare";
+import * as Output from "alchemy/Output";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
 import * as Layer from "effect/Layer";
@@ -10,6 +11,11 @@ import "varlock/auto-load";
 export const db = Cloudflare.D1.Database("database", {
 	migrations: "../../packages/db/src/migrations",
 });
+
+const serverUrl = (url: string) =>
+	process.env.NODE_ENV === "production"
+		? "https://api.verifind.efobi.dev"
+		: url;
 
 export const observability = Effect.gen(function* () {
 	const { stage } = yield* Alchemy.Stack;
@@ -62,7 +68,7 @@ export const server = Cloudflare.Worker("server", {
 	},
 	env: {
 		DB: db,
-    NODE_ENV: Config.withDefault(Config.String('NODE_ENV'), 'development'),
+		NODE_ENV: Config.withDefault(Config.String("NODE_ENV"), "development"),
 		BETTER_AUTH_SECRET: Config.Redacted("BETTER_AUTH_SECRET"),
 		BETTER_AUTH_URL: Cloudflare.Worker.URL,
 		...observabilityBindings,
@@ -90,7 +96,7 @@ export default Alchemy.Stack(
 				notFoundHandling: "single-page-application",
 			},
 			env: {
-				VITE_SERVER_URL: serverWorker.url.as<string>(),
+				VITE_SERVER_URL: Output.map(serverWorker.url.as<string>(), serverUrl),
 			},
 			dev: {
 				port: 3001,

@@ -6,7 +6,7 @@ import { betterAuth } from "better-auth";
 export interface AuthConfig {
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
-  NODE_ENV: string
+	NODE_ENV: string;
 }
 
 export function createAuth(
@@ -14,7 +14,7 @@ export function createAuth(
 	database: Database,
 	desktopOrigins: readonly string[] = []
 ) {
-  const isDev = env.NODE_ENV === 'development'
+	const isDev = env.NODE_ENV === "development";
 	return betterAuth({
 		database: drizzleAdapter(database, {
 			provider: "sqlite",
@@ -28,7 +28,7 @@ export function createAuth(
 						"http://localhost:3001",
 						"http://localhost:3002",
 					]
-				: []),
+				: ["http://verifind.efobi.dev"]),
 		],
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: env.BETTER_AUTH_URL,

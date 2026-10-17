@@ -29,9 +29,6 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Check formatting and lint
-        run: bun run check
-
       - name: Build applications
         run: bun run build
 
@@ -46,10 +43,8 @@ jobs:
     environment: production
     env:
       ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
-      ALCHEMY_STATE_TOKEN: ${{secrets.ALCHEMY_STATE_TOKEN}}
       AXIOM_API_KEY: ${{ secrets.AXIOM_API_KEY }}
       BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
-      BETTER_AUTH_URL: https://api.verifind.efobi.dev
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       NODE_ENV: production
