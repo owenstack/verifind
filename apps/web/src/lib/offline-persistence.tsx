@@ -7,7 +7,7 @@ import {
 import { clear, createStore, del, get, set } from "idb-keyval";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "./auth-client";
 
 const OFFLINE_USER_KEY = "verifind:offline-user";
 const CACHE_KEY = "query-cache";
@@ -76,7 +76,7 @@ export function OfflineQueryProvider({
 	client: QueryClient;
 	children: ReactNode;
 }) {
-	const session = authClient.useSession();
+	const session = useSession();
 	const onlineOwnerId = session.data?.user.id;
 	const ownerId =
 		onlineOwnerId ??

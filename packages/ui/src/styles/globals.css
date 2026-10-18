@@ -6,6 +6,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+	font-family: "Lato";
+	src: url("../assets/lato.ttf") format("truetype");
+}
+
 /* VeriFind shadcn/ui theme (Tailwind v4)
  * Source: Figma file mouJaVsDxV3gBfZQa0ZZf7. The file defines no color variables or styles,
  * so values come from the colors, fonts and radii used most across its layers.
@@ -128,6 +133,6 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
-		@apply bg-background text-foreground font-sans;
+		@apply bg-background text-foreground font-sans antialiased;
 	}
 }

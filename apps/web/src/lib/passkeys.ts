@@ -1,14 +1,14 @@
-import { authClient } from "@/lib/auth-client";
+import { passkey, signIn } from "@/lib/auth-client";
 
 export function registerPlatformPasskey(name?: string) {
-	return authClient.passkey.addPasskey({
+	return passkey.addPasskey({
 		name,
 		authenticatorAttachment: "platform",
 	});
 }
 
 export function signInWithPasskey() {
-	return authClient.signIn.passkey();
+	return signIn.passkey();
 }
 
 export async function startConditionalPasskeySignIn(): Promise<void> {
@@ -20,17 +20,17 @@ export async function startConditionalPasskeySignIn(): Promise<void> {
 		return;
 	}
 
-	await authClient.signIn.passkey({ autoFill: true });
+	await signIn.passkey({ autoFill: true });
 }
 
 export function listPasskeys() {
-	return authClient.passkey.listUserPasskeys();
+	return passkey.listUserPasskeys();
 }
 
 export function renamePasskey(id: string, name: string) {
-	return authClient.passkey.updatePasskey({ id, name });
+	return passkey.updatePasskey({ id, name });
 }
 
 export function revokePasskey(id: string) {
-	return authClient.passkey.deletePasskey({ id });
+	return passkey.deletePasskey({ id });
 }

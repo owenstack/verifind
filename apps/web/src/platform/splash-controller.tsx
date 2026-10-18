@@ -1,14 +1,14 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
 import { useTheme } from "@/components/theme-provider";
-import { authClient } from "@/lib/auth-client";
+import { useSession } from "@/lib/auth-client";
 
 const MINIMUM_MS = 200;
 const HARD_CAP_MS = 2500;
 const EASING = "cubic-bezier(0.2, 0, 0, 1)";
 
 export function SplashController() {
-	const session = authClient.useSession();
+	const session = useSession();
 	const location = useRouterState({ select: (state) => state.location });
 	const status = useRouterState({ select: (state) => state.status });
 	const { resolvedTheme } = useTheme();
@@ -76,7 +76,9 @@ export function SplashController() {
 			const bottom = document.createElement("div");
 			bottom.className = "vf-circle bottom";
 			bottom.style.opacity = "0";
-			splash.append(solid, top, bottom);
+			splash.appendChild(solid);
+			splash.appendChild(top);
+			splash.appendChild(bottom);
 			splash
 				.querySelector(".vf-shield")
 				?.animate([{ opacity: 1 }, { opacity: 0 }], {
