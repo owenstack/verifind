@@ -34,6 +34,9 @@ if (
 		"The built theme and once-per-session splash scripts are missing"
 	);
 }
+if (!html.includes('<svg class="vf-shield"')) {
+	throw new Error("The built inline splash shield is missing");
+}
 if (
 	!(
 		html.includes('media="(prefers-color-scheme: dark)"') &&

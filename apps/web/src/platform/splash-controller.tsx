@@ -77,12 +77,14 @@ export function SplashController() {
 			bottom.className = "vf-circle bottom";
 			bottom.style.opacity = "0";
 			splash.append(solid, top, bottom);
-			splash.querySelector("img")?.animate([{ opacity: 1 }, { opacity: 0 }], {
-				duration: 180,
-				delay: 120,
-				fill: "forwards",
-				easing: EASING,
-			});
+			splash
+				.querySelector(".vf-shield")
+				?.animate([{ opacity: 1 }, { opacity: 0 }], {
+					duration: 180,
+					delay: 120,
+					fill: "forwards",
+					easing: EASING,
+				});
 			const scale =
 				Math.hypot(innerWidth, innerHeight) / ((88 * innerWidth) / 100);
 			for (const circle of [top, bottom]) {
