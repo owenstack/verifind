@@ -16,6 +16,7 @@ import { type ReactNode, useState } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useOfflineStatus } from "@/lib/use-offline-status";
 import { PwaUpdateProvider, usePwaUpdates } from "@/platform/pwa-updates";
+import { SplashController } from "@/platform/splash-controller";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 
@@ -52,6 +53,7 @@ function RootComponent() {
 	return (
 		<>
 			<HeadContent />
+			<SplashController />
 			<ThemeProvider
 				attribute="class"
 				defaultTheme="system"
