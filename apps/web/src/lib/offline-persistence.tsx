@@ -2,7 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { QueryClientProvider } from "@tanstack/react-query";
 import {
 	type Persister,
-	PersistQueryClientProvider,
+	persistQueryClient,
 } from "@tanstack/react-query-persist-client";
 import { clear, createStore, del, get, set } from "idb-keyval";
 import type { ReactNode } from "react";
@@ -121,29 +121,25 @@ export function OfflineQueryProvider({
 		};
 	}, []);
 
-	if (ownerId && persister && storageAvailable) {
-		return (
-			<PersistQueryClientProvider
-				client={client}
-				persistOptions={{
-					persister,
-					maxAge: CACHE_MAX_AGE_MS,
-					buster: CACHE_BUSTER,
-					dehydrateOptions: {
-						shouldDehydrateQuery: (query) =>
-							query.state.status === "success" &&
-							query.meta?.offline === true,
-					},
-				}}
-			>
-				{children}
-			</PersistQueryClientProvider>
-		);
-	}
+	useEffect(() => {
+		if (!(ownerId && persister && storageAvailable)) {
+			return;
+		}
+		const [unsubscribe, restore] = persistQueryClient({
+			queryClient: client,
+			persister,
+			maxAge: CACHE_MAX_AGE_MS,
+			buster: CACHE_BUSTER,
+			dehydrateOptions: {
+				shouldDehydrateQuery: (query) =>
+					query.state.status === "success" && query.meta?.offline === true,
+			},
+		});
+		// Offline restore is best effort and must not hold the router subtree.
+		// biome-ignore lint/complexity/noVoid: cache restore runs in the background.
+		void restore.catch(() => undefined);
+		return unsubscribe;
+	}, [client, ownerId, persister, storageAvailable]);
 
-	return (
-		<QueryClientProvider client={client}>
-			{children}
-		</QueryClientProvider>
-	);
+	return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }
