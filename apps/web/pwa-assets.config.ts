@@ -1,40 +1,29 @@
-import { readFileSync } from "node:fs";
 import {
 	combinePresetAndAppleSplashScreens,
 	defineConfig,
 	minimal2023Preset as preset,
 } from "@vite-pwa/assets-generator/config";
+import { DARK_BACKGROUND, SPLASH_SHIELD_SIZE } from "./build-config/tokens.js";
 
-const tokenSource = readFileSync(
-	"../../packages/ui/src/styles/globals.css",
-	"utf8"
-);
-
-function tokenHex(name: string, mode: "light" | "dark"): string {
-	const source =
-		mode === "dark" ? tokenSource.split(".dark {")[1] : tokenSource;
-	const fallback = source
-		? new RegExp(`--${name}:\\s*[^;]+;\\s*/\\*\\s*(#[\\da-f]{3,8})`, "i").exec(
-				source
-			)?.[1]
-		: undefined;
-	if (!fallback) {
-		throw new Error(`Missing fallback color for --${name} in globals.css`);
-	}
-	return fallback;
-}
-
-const lightColor = tokenHex("background", "light");
-const darkColor = tokenHex("background", "dark");
+const darkPreset = {
+	...preset,
+	maskable: {
+		...preset.maskable,
+		padding: 0.3,
+		resizeOptions: { fit: "contain" as const, background: DARK_BACKGROUND },
+	},
+};
 
 export default defineConfig({
-	preset: combinePresetAndAppleSplashScreens(preset, {
-		resizeOptions: { fit: "contain", background: lightColor },
-		darkResizeOptions: { fit: "contain", background: darkColor },
-		linkMediaOptions: { addMediaScreen: true },
+	preset: combinePresetAndAppleSplashScreens(darkPreset, {
+		resizeOptions: { fit: "contain", background: DARK_BACKGROUND },
+		padding: 1 - SPLASH_SHIELD_SIZE,
+		name: (landscape, size) =>
+			`apple-splash-${landscape ? "landscape" : "portrait"}-${size.width}x${size.height}.png`,
 	}),
 	headLinkOptions: {
 		preset: "2023",
 	},
 	images: ["public/logo.svg"],
+	// TODO(design): approve the final VeriFind launcher icon.
 });
