@@ -53,12 +53,12 @@ function RootComponent() {
 	return (
 		<>
 			<HeadContent />
-			<SplashController />
 			<ThemeProvider
 				attribute="class"
 				defaultTheme="system"
 				disableTransitionOnChange
 			>
+				<SplashController />
 				<PwaUpdateProvider>
 					<PlatformShell>
 						<PageTransition>

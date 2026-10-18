@@ -53,7 +53,14 @@ export function readToken(name: string, mode: "light" | "dark"): string {
 export const DARK_BACKGROUND = readToken("background", "dark");
 export const LIGHT_BACKGROUND = readToken("background", "light");
 export const BRAND_GREEN = readToken("primary", "light");
-export const SPLASH_SHIELD_SIZE = 0.33;
+// Calibrated to the current PNG wrapper's measured visible width.
+export const SPLASH_VISIBLE_WIDTH = 0.313;
+export const INLINE_SHIELD_VISIBLE_FRACTION = 0.95;
+export const IOS_SHIELD_VISIBLE_FRACTION = 0.83;
+export const INLINE_SHIELD_SIZE =
+	SPLASH_VISIBLE_WIDTH / INLINE_SHIELD_VISIBLE_FRACTION;
+export const IOS_SHIELD_SIZE =
+	SPLASH_VISIBLE_WIDTH / IOS_SHIELD_VISIBLE_FRACTION;
 
 export function tokenComment(
 	name: string,

@@ -1,8 +1,8 @@
 # Launch splash
 
-The installed PWA splash is dark-first and appears once per browser session. The inline shield width is `0.33` of viewport width. The minimum display is 200 ms, the readiness cap is 2500 ms, and the signed-out reveal takes about 800 ms. The asset source remains `public/logo.svg`; it currently wraps a PNG image rather than vector shield paths.
+The installed PWA splash is dark-first and appears once per browser session. Both generated iOS and inline splashes target a visible shield width of `31.3%`; the inline width is capped at 160 px. The measured visible fractions for the current PNG wrapper are recorded in `build-config/tokens.ts`. The minimum display is 200 ms, the readiness cap is 2500 ms, and the signed-out reveal takes about 800 ms. The asset source remains `public/logo.svg`; it currently wraps a PNG image rather than vector shield paths, and a designer supplied vector is still needed.
 
-Tune the size ratio in `build/tokens.ts`. Tune timing and circle positions/scales in `src/platform/splash-controller.tsx` and the critical CSS in `vite.config.ts`. The easing is `cubic-bezier(0.2, 0, 0, 1)`. Regenerate startup and launcher assets with `cd apps/web && bun run generate-pwa-assets`.
+Tune the target and measured visible fractions in `build-config/tokens.ts`. Tune timing and circle positions/scales in `src/platform/splash-controller.tsx` and the critical CSS in `vite.config.ts`. The easing is `cubic-bezier(0.2, 0, 0, 1)`. Regenerate startup and launcher assets with `cd apps/web && bun run generate-pwa-assets`.
 
 ## Manual device matrix
 

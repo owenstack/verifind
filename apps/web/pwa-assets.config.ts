@@ -3,7 +3,7 @@ import {
 	defineConfig,
 	minimal2023Preset as preset,
 } from "@vite-pwa/assets-generator/config";
-import { DARK_BACKGROUND, SPLASH_SHIELD_SIZE } from "./build-config/tokens.js";
+import { DARK_BACKGROUND, IOS_SHIELD_SIZE } from "./build-config/tokens.js";
 
 const darkPreset = {
 	...preset,
@@ -17,7 +17,7 @@ const darkPreset = {
 export default defineConfig({
 	preset: combinePresetAndAppleSplashScreens(darkPreset, {
 		resizeOptions: { fit: "contain", background: DARK_BACKGROUND },
-		padding: 1 - SPLASH_SHIELD_SIZE,
+		padding: 1 - IOS_SHIELD_SIZE,
 		name: (landscape, size) =>
 			`apple-splash-${landscape ? "landscape" : "portrait"}-${size.width}x${size.height}.png`,
 	}),

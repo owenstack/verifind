@@ -82,6 +82,7 @@ export function OfflineQueryProvider({
 		onlineOwnerId ??
 		(session.error && !navigator.onLine ? readOfflineOwnerId() : null);
 	const [storageAvailable, setStorageAvailable] = useState(false);
+	const [restoredOwnerId, setRestoredOwnerId] = useState<string | null>(null);
 	const persister = useMemo(
 		() => (ownerId ? createPersister(ownerId) : undefined),
 		[ownerId]
@@ -98,6 +99,7 @@ export function OfflineQueryProvider({
 
 	useEffect(() => {
 		if (typeof indexedDB === "undefined") {
+			setStorageAvailable(true);
 			return;
 		}
 
@@ -135,11 +137,29 @@ export function OfflineQueryProvider({
 					query.state.status === "success" && query.meta?.offline === true,
 			},
 		});
-		// Offline restore is best effort and must not hold the router subtree.
-		// biome-ignore lint/complexity/noVoid: cache restore runs in the background.
-		void restore.catch(() => undefined);
-		return unsubscribe;
+		let active = true;
+		// biome-ignore lint/complexity/noVoid: restore completion gates query consumers.
+		void restore
+			.catch(() => undefined)
+			.then(() => {
+				if (active) {
+					setRestoredOwnerId(ownerId);
+				}
+			});
+		return () => {
+			active = false;
+			unsubscribe();
+		};
 	}, [client, ownerId, persister, storageAvailable]);
+
+	const waitingForSession = session.isPending;
+	const waitingForStorage = Boolean(ownerId && !storageAvailable);
+	const waitingForRestore = Boolean(
+		ownerId && storageAvailable && restoredOwnerId !== ownerId
+	);
+	if (waitingForSession || waitingForStorage || waitingForRestore) {
+		return <QueryClientProvider client={client}>{null}</QueryClientProvider>;
+	}
 
 	return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }

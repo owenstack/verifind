@@ -1,10 +1,16 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { getSession } from "@/lib/auth-client";
+import { readOfflineOwnerId } from "@/lib/offline-persistence";
 
 export const Route = createFileRoute("/")({
 	beforeLoad: async () => {
 		const session = await getSession();
-		if (!session.data) {
+		const offlineSession =
+			Boolean(session.error) &&
+			typeof navigator !== "undefined" &&
+			!navigator.onLine &&
+			Boolean(readOfflineOwnerId());
+		if (!(session.data || offlineSession)) {
 			throw redirect({ to: "/welcome" });
 		}
 	},

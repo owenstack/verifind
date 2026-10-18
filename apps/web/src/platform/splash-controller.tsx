@@ -33,16 +33,20 @@ export function SplashController() {
 	}, [resolvedTheme]);
 
 	useEffect(() => {
+		if (exiting.current) {
+			return;
+		}
 		const splash = document.getElementById("vf-splash");
 		if (!splash) {
 			return;
 		}
 		let removed = false;
+		let exitStarted = false;
 		let capTimer: number;
 		let taglineTimer: number;
 		let readyTimer: number;
 		const remove = () => {
-			if (removed || exiting.current) {
+			if (removed) {
 				return;
 			}
 			exiting.current = true;
@@ -52,14 +56,20 @@ export function SplashController() {
 		};
 		const showTagline = () => splash.classList.add("show-tagline");
 		const exitAtCap = () => {
+			if (exitStarted || removed) {
+				return;
+			}
+			exitStarted = true;
 			exiting.current = true;
 			splash.classList.add("exiting");
 			window.setTimeout(remove, 180);
 		};
 		const exit = () => {
-			if (removed) {
+			if (removed || exitStarted || exiting.current) {
 				return;
 			}
+			exitStarted = true;
+			exiting.current = true;
 			const reducedMotion = matchMedia(
 				"(prefers-reduced-motion: reduce)"
 			).matches;
