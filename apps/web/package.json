@@ -10,7 +10,8 @@
     "env:generate": "varlock codegen",
     "generate-pwa-assets": "bun scripts/generate-monochrome-icon.ts && pwa-assets-generator",
     "serve": "vite preview",
-    "start": "vite"
+    "start": "vite",
+    "verify-pwa-build": "bun scripts/verify-pwa-build.ts"
   },
   "dependencies": {
     "@better-auth/passkey": "1.7.7",
