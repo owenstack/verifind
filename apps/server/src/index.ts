@@ -31,12 +31,6 @@ const identifyUser = createAuthMiddleware(
 
 const app = new Hono<EvlogVariables>();
 
-app.use(evlog({ drain: createAxiomDrain() }));
-app.use("*", async (c, next) => {
-	await identifyUser(c.get("log"), c.req.raw.headers, c.req.path);
-	await next();
-});
-
 app.use(
 	"/*",
 	cors({
@@ -62,6 +56,24 @@ app.use(
 		credentials: true,
 	})
 );
+app.use(evlog({ drain: createAxiomDrain() }));
+
+app.use("*", async (c, next) => {
+	await identifyUser(c.get("log"), c.req.raw.headers, c.req.path);
+	await next();
+});
+
+app.use("*", async (c, next) => {
+	await next();
+	if (
+		c.req.path === "/rpc" ||
+		c.req.path.startsWith("/rpc/") ||
+		c.req.path.startsWith("/api/auth/")
+	) {
+		c.header("Cache-Control", "no-store, private");
+		c.header("Pragma", "no-cache");
+	}
+});
 
 app.on(["POST", "GET"], "/api/auth/*", async (c) =>
 	(await createAuth()).handler(c.req.raw)

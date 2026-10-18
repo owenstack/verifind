@@ -1,0 +1,111 @@
+html,
+body,
+#app {
+	width: 100%;
+	height: 100%;
+	min-height: 100%;
+	overflow: hidden;
+}
+
+html {
+	height: 100dvh;
+	overscroll-behavior: none;
+}
+
+body {
+	height: 100dvh;
+	margin: 0;
+	overscroll-behavior: none;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+	touch-action: manipulation;
+	-webkit-tap-highlight-color: transparent;
+}
+
+input,
+select,
+textarea {
+	font-size: max(16px, 1em);
+}
+
+.vf-app-shell {
+	position: relative;
+	box-sizing: border-box;
+	display: grid;
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	width: 100%;
+	height: var(--vf-visual-viewport-height, 100dvh);
+	min-height: 0;
+	padding-top: env(safe-area-inset-top, 0px);
+	padding-bottom: env(safe-area-inset-bottom, 0px);
+	overscroll-behavior: none;
+}
+
+.vf-app-shell__chrome {
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.vf-app-shell__content {
+	min-height: 0;
+	overflow: auto;
+	overscroll-behavior-y: contain;
+}
+
+.vf-app-shell__status-host {
+	position: absolute;
+	inset-inline: 0;
+	top: env(safe-area-inset-top, 0px);
+	z-index: 10;
+	pointer-events: none;
+}
+
+.vf-app-shell__status-host > * {
+	pointer-events: auto;
+}
+
+.vf-app-shell[data-keyboard-open] .vf-app-shell__tab-bar {
+	display: none;
+}
+
+.vf-bottom-sheet {
+	position: fixed;
+	inset: auto 0 0;
+	width: 100%;
+	max-width: none;
+	max-height: min(90dvh, 100%);
+	margin: 0;
+	overscroll-behavior: contain;
+	color: var(--foreground);
+	background: var(--background);
+	border: 0;
+	border-radius: var(--radius) var(--radius) 0 0;
+}
+
+.vf-page-transition {
+	view-transition-name: route-content;
+}
+
+::view-transition-old(route-content),
+::view-transition-new(route-content) {
+	animation-duration: var(--vf-motion-duration-standard, 200ms);
+	animation-timing-function: var(--vf-motion-easing-standard, ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	::view-transition-old(route-content),
+	::view-transition-new(route-content) {
+		animation-duration: 0s;
+	}
+}
+
+@supports not (height: 100dvh) {
+	.vf-app-shell {
+		height: 100vh;
+	}
+}

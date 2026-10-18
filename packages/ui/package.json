@@ -5,9 +5,12 @@
   "type": "module",
   "exports": {
     "./globals.css": "./src/styles/globals.css",
+    "./platform.css": "./src/styles/platform.css",
     "./lib/*": "./src/lib/*.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
+    "./platform/*": "./src/platform/*.tsx",
+    "./platform/use-install-prompt": "./src/platform/use-install-prompt.ts",
     "./postcss.config": "./postcss.config.mjs"
   },
   "scripts": {
