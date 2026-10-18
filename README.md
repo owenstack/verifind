@@ -114,7 +114,8 @@ Alchemy creates a stage-specific Axiom dataset and a least-privilege ingest toke
 | Type | Name | Purpose |
 | --- | --- | --- |
 | Secret | `ALCHEMY_PASSWORD` | Encrypts the Alchemy state. Use the same password for every deploy to this stage. |
-| Secret | `AXIOM_API_KEY` | Axiom credential allowed to manage the stack's dataset and ingest token. |
+| Secret | `AXIOM_TOKEN` | Axiom personal access token allowed to manage the stack's dataset and ingest token. |
+| Secret | `AXIOM_ORG_ID` | Organization ID for the Axiom personal access token. |
 | Secret | `BETTER_AUTH_SECRET` | Better Auth signing secret; use a random value with at least 32 characters. |
 | Secret | `CLOUDFLARE_API_TOKEN` | Cloudflare API token with account access for Workers Scripts, D1, Pages, Account Settings, and Secrets Store writes. |
 | Secret | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account that owns the production resources. |
