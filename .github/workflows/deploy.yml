@@ -43,7 +43,7 @@ jobs:
     environment: production
     env:
       ALCHEMY_PASSWORD: ${{ secrets.ALCHEMY_PASSWORD }}
-      AXIOM_API_KEY: ${{ secrets.AXIOM_API_KEY }}
+      AXIOM_TOKEN: ${{ secrets.AXIOM_TOKEN }}
       BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
