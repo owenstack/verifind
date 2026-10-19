@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getSession } from "@/lib/auth-client";
 import { readOfflineOwnerId } from "@/lib/offline-persistence";
 
-export const Route = createFileRoute("/_auth")({
+export const Route = createFileRoute("/_secure")({
 	component: AuthLayout,
 	beforeLoad: async () => {
 		const session = await getSession();
