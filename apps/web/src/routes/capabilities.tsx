@@ -15,15 +15,29 @@ import {
 } from "@/platform/capabilities";
 import { readEvidenceFile } from "@/platform/evidence-capture";
 
+const installStateLabels = {
+	installed: "Installed",
+	browser: "In browser",
+} as const;
+
+const pushStateLabels = {
+	checking: "Checking notification status…",
+	unsupported: "Not supported by this browser",
+	denied: "Blocked in browser settings",
+	subscribed: "Enabled",
+	unsubscribed: "Not enabled",
+} as const;
+
 export const Route = createFileRoute("/capabilities")({
 	component: CapabilitiesPage,
 });
 
 function CapabilitiesPage() {
 	const [status, setStatus] = useState(
-		"Choose an action to try a browser capability."
+		"Choose a feature below to see how it works on your device."
 	);
-	const [pushState, setPushState] = useState("Checking…");
+	const [pushState, setPushState] =
+		useState<keyof typeof pushStateLabels>("checking");
 	const [wakeLockActive, setWakeLockActive] = useState(false);
 	const [hapticsEnabled, setHapticsEnabled] = useState(
 		() => readCapabilityPreferences().haptics
@@ -38,14 +52,14 @@ function CapabilitiesPage() {
 
 	const tryShare = useCallback(async (): Promise<void> => {
 		const shared = await share({
-			title: "VeriFind platform example",
-			text: "Sharing from the VeriFind capability demo.",
+			title: "VeriFind Device Features",
+			text: "Explore VeriFind’s device features.",
 			url: window.location.href,
 		});
 		setStatus(
 			shared
-				? "Share sheet opened."
-				: "Share is unavailable or was dismissed; the page still works."
+				? "Choose an app to share this page."
+				: "Sharing isn’t available right now. You can keep using this page."
 		);
 	}, []);
 
@@ -53,15 +67,15 @@ function CapabilitiesPage() {
 		if (wakeLockActive) {
 			await releaseWakeLock();
 			setWakeLockActive(false);
-			setStatus("Screen wake lock released.");
+			setStatus("Your screen can turn off normally now.");
 			return;
 		}
 		const acquired = await requestWakeLock();
 		setWakeLockActive(acquired);
 		setStatus(
 			acquired
-				? "Screen stays awake while this page is visible."
-				: "Wake lock is unavailable or permission was denied."
+				? "Your screen will stay awake while this page is open."
+				: "Your browser couldn’t keep the screen awake. Check your device settings and try again."
 		);
 	}, [wakeLockActive]);
 
@@ -73,11 +87,11 @@ function CapabilitiesPage() {
 			try {
 				const compressed = await readEvidenceFile(file);
 				setStatus(
-					`Image ready: ${formatBytes(file.size)} → ${formatBytes(compressed.size)}. Upload is not wired until an authorized storage endpoint exists.`
+					`Image ready: ${formatBytes(file.size)} → ${formatBytes(compressed.size)}. It’s saved only in this session; no upload was made.`
 				);
 			} catch {
 				setStatus(
-					"This image could not be prepared. Choose another image or use the camera capture flow."
+					"We couldn’t prepare that image. Choose another image and try again."
 				);
 			}
 		},
@@ -94,7 +108,7 @@ function CapabilitiesPage() {
 	const tryHaptic = useCallback(() => triggerHaptic("success"), []);
 	const setBadge = useCallback(async (): Promise<void> => {
 		await setAppBadge(1);
-		setStatus("Badge set if supported.");
+		setStatus("App badge updated if your device supports badges.");
 	}, []);
 	const onHapticsChange = useCallback(
 		(event: ChangeEvent<HTMLInputElement>) => {
@@ -114,12 +128,13 @@ function CapabilitiesPage() {
 		<div className="mx-auto grid w-full max-w-3xl gap-6 p-4 sm:p-6">
 			<header className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					Example 3 · progressive enhancement
+					Example 3 · Features on Your Device
 				</p>
-				<h1 className="font-semibold text-2xl">Native-feeling capabilities</h1>
+				<h1 className="font-semibold text-2xl">Device Features</h1>
 				<p className="text-muted-foreground">
-					Each adapter feature-detects support and can fail without blocking the
-					core screen. All actions below are initiated by you.
+					Try vibration, sharing, app badges, and screen wake controls. Your
+					browser may not support every feature, and each one starts only when
+					you choose it.
 				</p>
 			</header>
 
@@ -128,20 +143,20 @@ function CapabilitiesPage() {
 				className="grid gap-3 rounded-lg border bg-card p-4"
 			>
 				<h2 className="font-semibold" id="capability-heading">
-					Device capabilities
+					Try a Device Feature
 				</h2>
 				<div className="flex flex-wrap gap-3">
 					<Button onClick={tryHaptic} type="button" variant="outline">
-						Try success haptic
+						Test Vibration
 					</Button>
 					<Button onClick={tryShare} type="button" variant="outline">
 						Share this page
 					</Button>
 					<Button onClick={setBadge} type="button" variant="outline">
-						Set app badge
+						Set App Badge
 					</Button>
 					<Button onClick={toggleWakeLock} type="button" variant="outline">
-						{wakeLockActive ? "Release wake lock" : "Request wake lock"}
+						{wakeLockActive ? "Allow Screen to Turn Off" : "Keep Screen Awake"}
 					</Button>
 				</div>
 				<label
@@ -154,18 +169,23 @@ function CapabilitiesPage() {
 						onChange={onHapticsChange}
 						type="checkbox"
 					/>
-					Enable haptics preference
+					Enable Vibration Feedback
 				</label>
 				<dl className="grid gap-2 text-sm sm:grid-cols-2">
-					<StatusItem label="Install state" value={getInstallState()} />
-					<StatusItem label="Push permission/subscription" value={pushState} />
+					<StatusItem
+						label="App installation"
+						value={installStateLabels[getInstallState()]}
+					/>
+					<StatusItem
+						label="Notifications"
+						value={pushStateLabels[pushState]}
+					/>
 				</dl>
 				<p aria-live="polite" className="text-muted-foreground text-sm">
 					{status}
 				</p>
 				<p className="text-muted-foreground text-sm">
-					Push subscription is intentionally not requested here: server VAPID
-					configuration and a subscription endpoint are not available yet.
+					Notifications aren’t enabled in this example yet.
 				</p>
 				<CodeExample>{`triggerHaptic("success");\nawait share({ title, text, url });\nawait setAppBadge(unreadCount);`}</CodeExample>
 			</section>
@@ -175,14 +195,14 @@ function CapabilitiesPage() {
 				className="grid gap-3 rounded-lg border bg-card p-4"
 			>
 				<h2 className="font-semibold" id="capture-heading">
-					Evidence image preparation
+					Prepare an Image
 				</h2>
 				<p className="text-muted-foreground text-sm">
-					This file input is the fallback when camera access is denied or
-					unavailable. Images are compressed locally; nothing is uploaded.
+					Choose an image to reduce its file size on your device. The image
+					stays in this session and isn’t uploaded.
 				</p>
 				<label className="grid gap-2 text-sm" htmlFor="evidence-image">
-					Choose an image
+					Choose an Image
 				</label>
 				<input
 					accept="image/*"

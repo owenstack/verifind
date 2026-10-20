@@ -5,5 +5,12 @@ export const Route = createFileRoute("/_auth/verify")({
 });
 
 function RouteComponent() {
-	return <div>Hello "/_auth/verify"!</div>;
+	return (
+		<main className="mx-auto grid w-full max-w-lg gap-3 p-4 sm:p-6">
+			<h1 className="font-semibold text-2xl">Email Verification</h1>
+			<p className="text-muted-foreground">
+				Complete the verification step to continue to VeriFind.
+			</p>
+		</main>
+	);
 }

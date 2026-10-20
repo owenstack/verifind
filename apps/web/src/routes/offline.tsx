@@ -32,7 +32,7 @@ function OfflineExamplesPage() {
 
 	useEffect(() => {
 		if (!ownerId) {
-			setMessage("Sign in once to enable private, user-scoped draft storage.");
+			setMessage("Sign in to save a private draft on this device.");
 			return;
 		}
 		let active = true;
@@ -43,13 +43,15 @@ function OfflineExamplesPage() {
 						setDraft(saved);
 					}
 					setMessage(
-						saved ? "Draft restored from this device." : "No saved draft yet."
+						saved
+							? "Your draft is ready on this device."
+							: "No saved draft yet."
 					);
 				}
 			})
 			.catch(() => {
 				if (active) {
-					setMessage("Local storage is unavailable in this browser session.");
+					setMessage("This browser session can’t access local storage.");
 				}
 			});
 		return () => {
@@ -59,14 +61,18 @@ function OfflineExamplesPage() {
 
 	const saveDraft = useCallback(async (): Promise<void> => {
 		if (!ownerId) {
-			setMessage("A signed-in user is required to save a private draft.");
+			setMessage("Sign in to save your draft privately on this device.");
 			return;
 		}
 		try {
 			await saveFormDraft(ownerId, draftId, draft);
-			setMessage("Draft saved on this device for up to 14 days.");
+			setMessage(
+				"Draft saved on this device. It will be removed after 14 days."
+			);
 		} catch {
-			setMessage("Draft could not be saved on this device.");
+			setMessage(
+				"Couldn’t save your draft. Check your device storage and try again."
+			);
 		}
 	}, [draft, ownerId]);
 
@@ -74,13 +80,13 @@ function OfflineExamplesPage() {
 		<div className="mx-auto grid w-full max-w-3xl gap-6 p-4 sm:p-6">
 			<header className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					Example 2 · connectivity and persistence
+					Example 2 · Offline Access & Saved Drafts
 				</p>
-				<h1 className="font-semibold text-2xl">Offline data and drafts</h1>
+				<h1 className="font-semibold text-2xl">Offline Access & Drafts</h1>
 				<p className="text-muted-foreground">
-					This page reads live connectivity, queued mutation count, and
-					service-worker update state. The banner at the top of the app is
-					supplied to AppShell's offline/update slots.
+					Check your connection, see whether changes are waiting to sync, and
+					apply an available app update. You can also save a private note on
+					this device and reopen it later.
 				</p>
 			</header>
 
@@ -89,31 +95,36 @@ function OfflineExamplesPage() {
 				className="grid gap-3 rounded-lg border bg-card p-4"
 			>
 				<h2 className="font-semibold" id="status-heading">
-					Current platform state
+					Connection & Update Status
 				</h2>
 				<dl className="grid gap-2 text-sm sm:grid-cols-2">
 					<StatusItem label="Network" value={isOnline ? "Online" : "Offline"} />
-					<StatusItem label="Pending mutations" value={String(pendingCount)} />
+					<StatusItem
+						label="Changes waiting to sync"
+						value={String(pendingCount)}
+					/>
 					<StatusItem
 						label="Last sync"
-						value={lastSyncFailed ? "Needs retry" : "No error reported"}
+						value={lastSyncFailed ? "Sync failed. Try again." : "Up to date"}
 					/>
 					<StatusItem
 						label="App shell"
-						value={offlineReady ? "Available offline" : "Not yet confirmed"}
+						value={
+							offlineReady ? "Ready to use offline" : "Checking availability"
+						}
 					/>
 					<StatusItem
 						label="App update"
-						value={updateAvailable ? "Ready to apply" : "No update waiting"}
+						value={updateAvailable ? "Update ready" : "No update available"}
 					/>
 				</dl>
 				<div className="flex flex-wrap gap-3">
 					<Button onClick={resetSyncStatus} type="button" variant="outline">
-						Clear demo sync status
+						Clear Sync Error
 					</Button>
 					{updateAvailable ? (
 						<Button onClick={applyUpdate} type="button">
-							Apply update
+							Apply Update
 						</Button>
 					) : null}
 				</div>
@@ -129,14 +140,14 @@ function OfflineExamplesPage() {
 				className="grid gap-3 rounded-lg border bg-card p-4"
 			>
 				<h2 className="font-semibold" id="draft-heading">
-					Private draft example
+					Save a Private Note
 				</h2>
 				<p className="text-muted-foreground text-sm">
-					This sample saves only under the remembered account ID. Sign in to try
-					IndexedDB persistence; signing out clears this draft store.
+					Your note is saved in this browser and linked to your account. Sign in
+					to try it. Signing out removes saved data from this device.
 				</p>
 				<label className="grid gap-2 text-sm" htmlFor="demo-draft">
-					A note you are working on
+					Your Note
 				</label>
 				<textarea
 					className="min-h-24 rounded-md border bg-background p-3 text-foreground"
@@ -153,15 +164,14 @@ function OfflineExamplesPage() {
 					type="button"
 					variant="outline"
 				>
-					Save draft to this device
+					Save Note
 				</Button>
 				<CodeExample>{`await saveFormDraft(ownerId, "verification", formValues);\nconst values = await loadFormDraft(ownerId, "verification");`}</CodeExample>
 			</section>
 
 			<p className="text-muted-foreground text-sm">
-				Queued mutations need a screen-specific handler and an idempotency
-				strategy. Do not queue payments, identity evidence, or other
-				irreversible actions for blind replay.
+				Changes that need server confirmation may wait until you’re online.
+				Don’t queue payments or identity documents for automatic replay.
 			</p>
 		</div>
 	);

@@ -34,16 +34,14 @@ function ShellExamplesPage() {
 						Back
 					</AppBackButton>
 					<p className="text-muted-foreground text-sm">
-						Example 1 · navigation and shell
+						Example 1 · Navigation & App Layout
 					</p>
 				</div>
-				<h1 className="font-semibold text-2xl">
-					App shell and behavior primitives
-				</h1>
+				<h1 className="font-semibold text-2xl">App Layout & Navigation</h1>
 				<p className="text-muted-foreground">
-					The persistent header, safe-area-aware footer, offline host, and
-					update host are wired in the root route. These examples show
-					page-level behavior.
+					See how the app handles navigation, device safe areas, offline status,
+					and updates. The examples below show features you can try on this
+					page.
 				</p>
 			</header>
 
@@ -55,8 +53,8 @@ function ShellExamplesPage() {
 					Pull to refresh
 				</h2>
 				<p className="text-muted-foreground text-sm">
-					On touch devices, pull down from the top of this panel. The hook only
-					refreshes when its element is at scroll position zero.
+					On a touch screen, pull down from the top of this list to refresh it.
+					You can also use the button below.
 				</p>
 				<section
 					aria-label="Pull to refresh example"
@@ -74,7 +72,7 @@ function ShellExamplesPage() {
 							className="border-b py-4 text-muted-foreground text-sm"
 							key={row}
 						>
-							Scrollable demo row {row}
+							Sample list item {row}
 						</p>
 					))}
 				</section>
@@ -84,7 +82,7 @@ function ShellExamplesPage() {
 					type="button"
 					variant="outline"
 				>
-					{pull.refreshing ? "Refreshing…" : "Refresh (accessible alternative)"}
+					{pull.refreshing ? "Refreshing…" : "Refresh List"}
 				</Button>
 				<CodeExample>
 					{
@@ -98,43 +96,44 @@ function ShellExamplesPage() {
 				className="grid gap-3 rounded-lg border bg-card p-4"
 			>
 				<h2 className="font-semibold" id="sheet-heading">
-					Bottom sheet and in-app back
+					Bottom Sheet & Back Navigation
 				</h2>
 				<p className="text-muted-foreground text-sm">
-					BottomSheet handles modal focus, Escape/back dismissal, and an
-					accessible title. The designer supplies its inner content and styling.
+					Open a panel that supports keyboard and device back controls. Press
+					Escape, use your device’s back gesture, or select the close button to
+					dismiss it.
 				</p>
 				<div className="flex flex-wrap gap-3">
 					<Button onClick={openSheet} type="button">
-						Open bottom sheet
+						Open Bottom Sheet
 					</Button>
 					<Button onClick={goBack} type="button" variant="outline">
-						Use shell back
+						Go Back
 					</Button>
 					<Link
 						className="self-center text-primary text-sm underline"
 						to="/offline"
 						viewTransition
 					>
-						See route transition
+						View Offline Example
 					</Link>
 				</div>
 				<CodeExample>{`<BottomSheet open={open} onOpenChange={setOpen} title="…">\n  <DesignerContent />\n</BottomSheet>`}</CodeExample>
 			</section>
 
 			<BottomSheet
-				description="The browser dialog provides modal behavior; provide screen content and token-based styling."
+				description="A panel that keeps keyboard and screen reader focus in the dialog."
 				onOpenChange={setSheetOpen}
 				open={sheetOpen}
-				title="Example sheet"
+				title="Sample Bottom Sheet"
 			>
 				<div className="grid gap-4 p-4">
 					<p className="text-muted-foreground text-sm">
-						This sample sheet closes from Escape, the browser back gesture, or
-						the button.
+						Close this panel with Escape, your device’s back gesture, or the
+						button.
 					</p>
 					<Button onClick={closeSheet} type="button" variant="outline">
-						Close
+						Close Panel
 					</Button>
 				</div>
 			</BottomSheet>

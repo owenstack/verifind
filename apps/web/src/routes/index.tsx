@@ -20,21 +20,21 @@ export const Route = createFileRoute("/")({
 const examples = [
 	{
 		to: "/platform" as const,
-		title: "App shell and navigation",
+		title: "App Shell & Navigation",
 		description:
-			"Safe areas, bottom sheets, back handling, route transitions, and pull to refresh.",
+			"Explore app navigation, back controls, bottom sheets, and pull to refresh.",
 	},
 	{
 		to: "/offline" as const,
-		title: "Offline data and drafts",
+		title: "Offline Access & Drafts",
 		description:
-			"Connection state, per-user local drafts, queued mutation status, and update prompts.",
+			"Check your connection, save a private draft, and see when updates are ready.",
 	},
 	{
 		to: "/capabilities" as const,
-		title: "Native-feeling capabilities",
+		title: "Device Features",
 		description:
-			"Haptics, sharing, badges, wake lock, notifications, and camera fallbacks.",
+			"Try vibration, sharing, screen wake, app badges, and image capture features.",
 	},
 ];
 
@@ -43,14 +43,15 @@ function OverviewPage() {
 		<div className="mx-auto grid w-full max-w-3xl gap-6 p-4 sm:p-6">
 			<header className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					VeriFind engineering showcase
+					VeriFind Platform Examples
 				</p>
-				<h1 className="font-semibold text-2xl">Use the platform foundation</h1>
+				<h1 className="font-semibold text-2xl">
+					Explore VeriFind’s App Features
+				</h1>
 				<p className="max-w-prose text-muted-foreground">
-					These working examples show how to connect the behavior primitives to
-					a screen. The component visuals are examples only; replace them with
-					the designer's screen treatment while keeping the hooks and
-					accessibility behavior.
+					Try the navigation, offline, and device features that support the
+					VeriFind experience. These interactive examples show how each feature
+					behaves on your device.
 				</p>
 			</header>
 			<div className="grid gap-3">
@@ -75,21 +76,22 @@ function OverviewPage() {
 				className="grid gap-3 rounded-lg border bg-muted p-4"
 			>
 				<h2 className="font-semibold" id="setup-heading">
-					How to explore
+					How to Try These Examples
 				</h2>
 				<ol className="list-inside list-decimal space-y-2 text-muted-foreground text-sm">
-					<li>Use the bottom navigation to switch examples.</li>
+					<li>Choose an example above to explore its features.</li>
 					<li>
-						Resize to a narrow viewport or open a mobile keyboard to inspect
-						shell behavior.
+						Open an example on your phone or resize your browser to see how the
+						layout adapts.
 					</li>
 					<li>
-						Try the interactive controls; denied or unsupported browser features
-						report a graceful fallback.
+						Try the controls. If your browser doesn’t support a feature, the
+						page will explain what happened.
 					</li>
 					<li>
-						Open each file in <code>apps/web/src/routes</code> to see the
-						component and hook wiring.
+						Developers can inspect the route files in{" "}
+						<code>apps/web/src/routes</code>
+						to see how each example works.
 					</li>
 				</ol>
 			</section>

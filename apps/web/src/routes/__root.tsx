@@ -33,7 +33,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "description",
-				content: "VeriFind rental trust platform",
+				content: "Find verified rental homes with VeriFind.",
 			},
 		],
 		links: [
@@ -82,8 +82,8 @@ function PlatformShell({ children }: { children: ReactNode }) {
 				!offline.isOnline || offline.pendingCount > 0 ? (
 					<div className="bg-muted px-4 py-2 text-muted-foreground text-sm">
 						{offline.isOnline
-							? `${offline.pendingCount} pending offline change${offline.pendingCount === 1 ? "" : "s"}`
-							: "Offline · saved data remains available"}
+							? `${offline.pendingCount} change${offline.pendingCount === 1 ? "" : "s"} waiting to sync`
+							: "You’re offline. Saved data is still available."}
 					</div>
 				) : null
 			}
