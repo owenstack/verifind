@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_secure")({
 			typeof navigator !== "undefined" &&
 			!navigator.onLine &&
 			Boolean(readOfflineOwnerId());
-		if (!session.data && !offlineSession) {
+		if (!(session.data || offlineSession)) {
 			throw redirect({
 				to: "/login",
 			});

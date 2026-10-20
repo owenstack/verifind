@@ -7,8 +7,8 @@ import { VitePWA } from "vite-plugin-pwa";
 import {
 	BRAND_GREEN,
 	DARK_BACKGROUND,
-	LIGHT_BACKGROUND,
 	INLINE_SHIELD_SIZE,
+	LIGHT_BACKGROUND,
 } from "./build-config/tokens.js";
 
 const splashLogo = readFileSync(

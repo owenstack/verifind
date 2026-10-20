@@ -5,7 +5,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
 	createRootRouteWithContext,
 	HeadContent,
-	Link,
 	Outlet,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -78,6 +77,7 @@ function PlatformShell({ children }: { children: ReactNode }) {
 	const { updateAvailable, applyUpdate } = usePwaUpdates();
 	return (
 		<AppShell
+			className="grid min-h-dvh"
 			offlineHost={
 				!offline.isOnline || offline.pendingCount > 0 ? (
 					<div className="bg-muted px-4 py-2 text-muted-foreground text-sm">
@@ -87,8 +87,6 @@ function PlatformShell({ children }: { children: ReactNode }) {
 					</div>
 				) : null
 			}
-			tabBar={<DemoTabBar />}
-			topBar={<DemoTopBar />}
 			updateHost={
 				updateAvailable ? (
 					<button
@@ -106,46 +104,27 @@ function PlatformShell({ children }: { children: ReactNode }) {
 	);
 }
 
-function DemoTopBar() {
-	return (
-		<header className="flex items-center justify-between border-b bg-background px-4 py-3">
-			<Link className="font-semibold text-foreground" to="/" viewTransition>
-				VeriFind · Platform examples
-			</Link>
-			<span className="text-muted-foreground text-sm">Component showcase</span>
-		</header>
-	);
-}
+// function DemoTopBar() {
+// 	return (
+// 		<header className="flex items-center justify-between border-b bg-background px-4 py-3">
+// 			<Link className="font-semibold text-foreground" to="/" viewTransition>
+// 				VeriFind · Platform examples
+// 			</Link>
+// 			<span className="text-muted-foreground text-sm">Component showcase</span>
+// 		</header>
+// 	);
+// }
 
-function DemoTabBar() {
-	return (
-		<nav
-			aria-label="Platform examples"
-			className="grid grid-cols-4 border-t bg-background"
-		>
-			<DemoNavLink to="/">Overview</DemoNavLink>
-			<DemoNavLink to="/platform">Shell</DemoNavLink>
-			<DemoNavLink to="/offline">Offline</DemoNavLink>
-			<DemoNavLink to="/capabilities">Capabilities</DemoNavLink>
-		</nav>
-	);
-}
-
-function DemoNavLink({
-	children,
-	to,
-}: {
-	children: string;
-	to: "/" | "/platform" | "/offline" | "/capabilities";
-}) {
-	return (
-		<Link
-			activeProps={{ className: "bg-muted text-foreground" }}
-			className="px-2 py-3 text-center text-muted-foreground text-xs"
-			to={to as string}
-			viewTransition
-		>
-			{children}
-		</Link>
-	);
-}
+// function DemoTabBar() {
+// 	return (
+// 		<nav
+// 			aria-label="Platform examples"
+// 			className="grid grid-cols-4 border-t bg-background"
+// 		>
+// 			<DemoNavLink to="/">Overview</DemoNavLink>
+// 			<DemoNavLink to="/platform">Shell</DemoNavLink>
+// 			<DemoNavLink to="/offline">Offline</DemoNavLink>
+// 			<DemoNavLink to="/capabilities">Capabilities</DemoNavLink>
+// 		</nav>
+// 	);
+// }
