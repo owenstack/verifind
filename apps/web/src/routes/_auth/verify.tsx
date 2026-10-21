@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import z from "zod";
+
+const searchSchema = z.object({
+	email: z.email().optional(),
+	next: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_auth/verify")({
 	component: RouteComponent,
+	validateSearch: searchSchema,
 });
 
 function RouteComponent() {

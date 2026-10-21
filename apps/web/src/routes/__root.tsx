@@ -18,6 +18,8 @@ import { PwaUpdateProvider, usePwaUpdates } from "@/platform/pwa-updates";
 import { SplashController } from "@/platform/splash-controller";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
+import { Toaster } from "@verifind/ui/components/toast";
+import { Offline } from "@/components/offline";
 
 export interface RouterAppContext {
 	orpc: typeof orpc;
@@ -62,6 +64,7 @@ function RootComponent() {
 					<PlatformShell>
 						<PageTransition>
 							<Outlet />
+							<Toaster />
 						</PageTransition>
 					</PlatformShell>
 				</PwaUpdateProvider>
@@ -75,18 +78,10 @@ function RootComponent() {
 function PlatformShell({ children }: { children: ReactNode }) {
 	const offline = useOfflineStatus();
 	const { updateAvailable, applyUpdate } = usePwaUpdates();
+
 	return (
 		<AppShell
 			className="grid min-h-dvh"
-			offlineHost={
-				!offline.isOnline || offline.pendingCount > 0 ? (
-					<div className="bg-muted px-4 py-2 text-muted-foreground text-sm">
-						{offline.isOnline
-							? `${offline.pendingCount} change${offline.pendingCount === 1 ? "" : "s"} waiting to sync`
-							: "You’re offline. Saved data is still available."}
-					</div>
-				) : null
-			}
 			updateHost={
 				updateAvailable ? (
 					<button
@@ -99,7 +94,7 @@ function PlatformShell({ children }: { children: ReactNode }) {
 				) : null
 			}
 		>
-			{children}
+			{offline.isOnline ? children : <Offline />}
 		</AppShell>
 	);
 }

@@ -6,7 +6,7 @@ import { BottomSheet } from "@verifind/ui/platform/bottom-sheet";
 import { useCallback, useState } from "react";
 import { useAppBack } from "@/platform/use-app-back";
 
-export const Route = createFileRoute("/platform")({
+export const Route = createFileRoute("/examples/platform")({
 	component: ShellExamplesPage,
 });
 

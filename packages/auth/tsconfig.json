@@ -1,6 +1,7 @@
 {
   "extends": "@verifind/config/tsconfig.base.json",
   "compilerOptions": {
+    "jsx": "react-jsx",
     "composite": true,
     "declaration": true,
     "declarationMap": true,

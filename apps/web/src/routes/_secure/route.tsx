@@ -4,7 +4,7 @@ import { readOfflineOwnerId } from "@/lib/offline-persistence";
 
 export const Route = createFileRoute("/_secure")({
 	component: AuthLayout,
-	beforeLoad: async () => {
+	beforeLoad: async ({ location }) => {
 		const session = await getSession();
 		const offlineSession =
 			Boolean(session.error) &&
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/_secure")({
 		if (!(session.data || offlineSession)) {
 			throw redirect({
 				to: "/login",
+				search: { next: location.href },
 			});
 		}
 		return {

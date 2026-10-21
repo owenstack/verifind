@@ -6,7 +6,7 @@ import { readOfflineOwnerId } from "@/lib/offline-persistence";
 import { useOfflineStatus } from "@/lib/use-offline-status";
 import { usePwaUpdates } from "@/platform/pwa-updates";
 
-export const Route = createFileRoute("/offline")({
+export const Route = createFileRoute("/examples/offline")({
 	component: OfflineExamplesPage,
 });
 

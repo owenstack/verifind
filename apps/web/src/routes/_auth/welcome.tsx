@@ -1,23 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { buttonVariants } from "@verifind/ui/components/button";
-import welcomeImage from "@/assets/welcome.png";
 
-export const Route = createFileRoute("/welcome")({
+export const Route = createFileRoute("/_auth/welcome")({
 	component: RouteComponent,
 });
 
 function RouteComponent() {
 	return (
-		<main className="relative flex min-h-screen flex-col overflow-hidden">
-			<img
-				alt=""
-				className="absolute inset-0 size-full object-cover"
-				height={4000}
-				src={welcomeImage}
-				width={4000}
-			/>
+		<div className="z-10">
 			<div className="absolute inset-0 bg-linear-to-b from-black/10 via-primary/30 to-primary" />
-			<div className="absolute top-[46%] left-1/2 z-10 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
+			<div className="absolute top-[46%] left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4">
 				<img
 					alt="VeriFind"
 					className="size-16 sm:size-20"
@@ -29,7 +21,7 @@ function RouteComponent() {
 					VeriFind
 				</h1>
 			</div>
-			<div className="relative z-10 mx-auto flex min-h-screen w-full max-w-lg flex-col justify-end px-6 pt-16 pb-20 text-center sm:px-10 sm:pb-24">
+			<div className="relative mx-auto flex min-h-screen w-full max-w-lg flex-col justify-end px-6 pt-16 pb-20 text-center sm:px-10 sm:pb-24">
 				<div className="mb-10 space-y-3">
 					<p className="font-semibold text-2xl tracking-tight sm:text-3xl">
 						Find a Rental You Can Trust
@@ -58,6 +50,6 @@ function RouteComponent() {
 					</Link>
 				</p>
 			</div>
-		</main>
+		</div>
 	);
 }

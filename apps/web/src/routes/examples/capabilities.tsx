@@ -28,7 +28,7 @@ const pushStateLabels = {
 	unsubscribed: "Not enabled",
 } as const;
 
-export const Route = createFileRoute("/capabilities")({
+export const Route = createFileRoute("/examples/capabilities")({
 	component: CapabilitiesPage,
 });
 

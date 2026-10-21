@@ -8,25 +8,22 @@ import {
 	verification as verificationTable,
 } from "@verifind/db/schema/auth";
 import { passkey as passkeyTable } from "@verifind/db/schema/passkey";
+import { sendSignInOTPEmail } from "@verifind/email";
 import { type Auth, type BetterAuthOptions, betterAuth } from "better-auth";
 import { emailOTP } from "better-auth/plugins";
 
 export interface AuthConfig {
 	BETTER_AUTH_SECRET: string;
 	BETTER_AUTH_URL: string;
+	GOOGLE_CLIENT_ID: string;
+	GOOGLE_CLIENT_SECRET: string;
 	NODE_ENV: string;
+	RESEND_API_KEY: string;
 }
-
-export type EmailOtpSender = (message: {
-	email: string;
-	code: string;
-	type: "sign-in" | "email-verification" | "forget-password" | "change-email";
-}) => Promise<void>;
 
 export function createAuth(
 	env: AuthConfig,
-	database: Database,
-	emailOtpSender?: EmailOtpSender
+	database: Database
 ): Auth<BetterAuthOptions> {
 	const isDev = env.NODE_ENV === "development";
 	const authBaseURL =
@@ -56,6 +53,12 @@ export function createAuth(
 				verification: verificationTable,
 			},
 		}),
+		socialProviders: {
+			google: {
+				clientId: env.GOOGLE_CLIENT_ID,
+				clientSecret: env.GOOGLE_CLIENT_SECRET,
+			},
+		},
 		trustedOrigins: appOrigins,
 		secret: env.BETTER_AUTH_SECRET,
 		baseURL: authBaseURL,
@@ -93,11 +96,13 @@ export function createAuth(
 				otpLength: 6,
 				expiresIn: 300,
 				allowedAttempts: 5,
-				async sendVerificationOTP({ email, otp: code, type }) {
-					if (!emailOtpSender) {
-						throw new Error("Email OTP delivery is not configured.");
+				async sendVerificationOTP({ email, otp, type }) {
+					if (type === "sign-in") {
+						await sendSignInOTPEmail({
+							apiKey: env.RESEND_API_KEY,
+							props: { email, otp },
+						});
 					}
-					await emailOtpSender({ email, code, type });
 				},
 			}),
 		],

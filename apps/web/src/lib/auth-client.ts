@@ -4,7 +4,7 @@ import { createAuthClient } from "better-auth/react";
 
 import { ENV } from "../env.public";
 
-export const { signIn, signOut, getSession, useSession, passkey } =
+export const { signIn, signOut, getSession, useSession, passkey, emailOtp } =
 	createAuthClient({
 		baseURL: ENV.VITE_SERVER_URL,
 		plugins: [passkeyClient(), emailOTPClient()],
