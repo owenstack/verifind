@@ -10,7 +10,9 @@ export interface EvidenceCaptureOptions {
 
 export async function openEvidenceCamera(): Promise<CameraSession> {
 	if (!navigator.mediaDevices?.getUserMedia) {
-		throw new Error("Camera capture is not supported in this browser.");
+		throw new Error(
+			"Camera access isn’t available in this browser. Choose an image file instead."
+		);
 	}
 	const stream = await navigator.mediaDevices.getUserMedia({
 		audio: false,
@@ -49,7 +51,9 @@ export function compressEvidenceImage(
 		sourceHeight = image.height;
 	}
 	if (sourceWidth <= 0 || sourceHeight <= 0) {
-		throw new Error("The evidence image is not ready to capture.");
+		throw new Error(
+			"The image isn’t ready yet. Wait for it to load, then try again."
+		);
 	}
 	const scale = Math.min(1, maxDimension / Math.max(sourceWidth, sourceHeight));
 	const canvas = document.createElement("canvas");
@@ -57,7 +61,9 @@ export function compressEvidenceImage(
 	canvas.height = Math.round(sourceHeight * scale);
 	const context = canvas.getContext("2d", { alpha: false });
 	if (!context) {
-		throw new Error("Image compression is unavailable.");
+		throw new Error(
+			"Your browser can’t resize this image. Choose a smaller image and try again."
+		);
 	}
 	context.drawImage(image, 0, 0, canvas.width, canvas.height);
 	return new Promise((resolve, reject) => {
@@ -67,7 +73,11 @@ export function compressEvidenceImage(
 					resolve(blob);
 					return;
 				}
-				reject(new Error("The evidence image could not be compressed."));
+				reject(
+					new Error(
+						"This image couldn’t be resized. Choose another image and try again."
+					)
+				);
 			},
 			"image/jpeg",
 			quality

@@ -13,16 +13,20 @@ export function Offline() {
 				</div>
 				<div className="space-y-2">
 					<h1 className="font-semibold text-3xl tracking-tight sm:text-4xl">
-						You're currently offline
+						You’re Offline
 					</h1>
 					<p className="text-base text-muted-foreground leading-relaxed">
-						It looks like your internet connection is unavailable. Reconnect to
-						keep finding verified homes and contacting landlords.
+						Your internet connection is unavailable. Reconnect to keep browsing
+						verified homes and contacting landlords.
 					</p>
 				</div>
 				<div className="flex w-full flex-col gap-3 pt-1">
-					<Button className="w-full" size="lg">
-						Try again
+					<Button
+						className="w-full"
+						onClick={() => window.location.reload()}
+						size="lg"
+					>
+						Retry Connection
 					</Button>
 					<Link
 						className={buttonVariants({
@@ -32,7 +36,7 @@ export function Offline() {
 						})}
 						to="/saved"
 					>
-						View saved homes
+						View Saved Homes
 					</Link>
 				</div>
 				<p className="flex items-start justify-center gap-2 text-muted-foreground text-sm leading-relaxed">

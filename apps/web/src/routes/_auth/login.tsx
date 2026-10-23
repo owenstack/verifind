@@ -1,17 +1,20 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { Button } from "@verifind/ui/components/button";
 import {
 	Field,
 	FieldDescription,
 	FieldError,
 	FieldGroup,
 	FieldLabel,
+	FieldSeparator,
 	FieldSet,
 	FieldTitle,
 } from "@verifind/ui/components/field";
 import { Input } from "@verifind/ui/components/input";
 import { toast } from "@verifind/ui/components/toast";
 import z from "zod";
+import { GoogleSignIn } from "@/components/google";
 import { emailOtp } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/_auth/login")({
@@ -41,31 +44,37 @@ function RouteComponent() {
 					type: "sign-in",
 				}),
 				{
-					loading: "Sending verification email...",
+					loading: "Sending Sign-In Code…",
 					success: () => {
 						navigate({
 							to: "/verify",
 							search: {
 								email,
 								next,
+								type: "sign-in",
 							},
 						});
-						return "Verification email sent successfully";
+						return "Check your email for a sign-in code.";
 					},
-					error: "Failed to send verification email",
+					error:
+						"Couldn’t send your sign-in code. Check your email address and try again.",
 				}
 			);
 		},
 	});
 	return (
-		<div className="absolute inset-x-0 bottom-0 z-10 h-fit rounded-t-xl bg-background p-4">
-			<div className="grid gap-4">
-				<FieldSet>
-					<FieldTitle className="text-3xl">Welcome back</FieldTitle>
-					<FieldDescription className="text-muted-foreground text-xl">
-						Sign in to continue
-					</FieldDescription>
-					<FieldGroup>
+		<div className="absolute inset-x-0 bottom-0 z-10 flex min-h-[66.67vh] flex-col rounded-t-3xl bg-background px-5 py-6 sm:bottom-8 sm:mx-auto sm:max-w-md sm:rounded-3xl sm:px-8 sm:py-8">
+			<div className="flex flex-col gap-6">
+				<FieldSet className="gap-6">
+					<div className="space-y-1.5">
+						<FieldTitle className="font-semibold text-3xl tracking-tight sm:text-4xl">
+							Welcome Back
+						</FieldTitle>
+						<FieldDescription className="text-base text-muted-foreground sm:text-lg">
+							Enter your email to get a sign-in code.
+						</FieldDescription>
+					</div>
+					<FieldGroup className="gap-5">
 						<form
 							className="w-full"
 							onSubmit={(e) => {
@@ -73,35 +82,67 @@ function RouteComponent() {
 								form.handleSubmit();
 							}}
 						>
-							<form.Field name="email">
-								{(field) => {
-									const isInvalid =
-										field.state.meta.isTouched && !field.state.meta.isValid;
-									return (
-										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>
-												Email address
-											</FieldLabel>
-											<Input
-												aria-invalid={isInvalid}
-												id={field.name}
-												name={field.name}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-												placeholder="email@example.com"
-												required
-												type="email"
-											/>
-											{isInvalid && (
-												<FieldError errors={field.state.meta.errors} />
-											)}
-										</Field>
-									);
-								}}
-							</form.Field>
+							<FieldGroup className="gap-4">
+								<form.Field name="email">
+									{(field) => {
+										const isInvalid =
+											field.state.meta.isTouched && !field.state.meta.isValid;
+										return (
+											<Field className="gap-2" data-invalid={isInvalid}>
+												<FieldLabel
+													className="font-medium"
+													htmlFor={field.name}
+												>
+													Email address
+												</FieldLabel>
+												<Input
+													aria-invalid={isInvalid}
+													className="h-11"
+													id={field.name}
+													name={field.name}
+													onBlur={field.handleBlur}
+													onChange={(e) => field.handleChange(e.target.value)}
+													placeholder="name@example.com…"
+													required
+													type="email"
+												/>
+												{isInvalid && (
+													<FieldError errors={field.state.meta.errors} />
+												)}
+											</Field>
+										);
+									}}
+								</form.Field>
+								<form.Subscribe selector={(s) => s.isSubmitting}>
+									{(isSubmitting) => (
+										<Button
+											className="h-11 w-full font-medium"
+											disabled={isSubmitting}
+										>
+											{isSubmitting ? "Sending Code…" : "Send Sign-In Code"}
+										</Button>
+									)}
+								</form.Subscribe>
+							</FieldGroup>
 						</form>
+						<FieldSeparator className="text-muted-foreground text-xs">
+							OR
+						</FieldSeparator>
+						<GoogleSignIn next={next} />
 					</FieldGroup>
+					<FieldDescription className="flex flex-wrap items-center gap-x-2 gap-y-0 text-center text-sm">
+						<span className="text-muted-foreground">
+							Don’t have an account?
+						</span>
+						<Link className="font-medium text-primary" to="/signup">
+							Create an Account
+						</Link>
+					</FieldDescription>
 				</FieldSet>
+				<FieldDescription className="mt-auto pt-6 text-center text-muted-foreground text-sm leading-6">
+					By continuing, you agree to VeriFind’s Terms of Service and Privacy
+					Policy.
+				</FieldDescription>
 			</div>
 		</div>
 	);

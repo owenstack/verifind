@@ -91,7 +91,7 @@ function CapabilitiesPage() {
 				);
 			} catch {
 				setStatus(
-					"We couldn’t prepare that image. Choose another image and try again."
+					"This image couldn’t be prepared. Choose another image and try again."
 				);
 			}
 		},
@@ -150,7 +150,7 @@ function CapabilitiesPage() {
 						Test Vibration
 					</Button>
 					<Button onClick={tryShare} type="button" variant="outline">
-						Share this page
+						Share This Page
 					</Button>
 					<Button onClick={setBadge} type="button" variant="outline">
 						Set App Badge

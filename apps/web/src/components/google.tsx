@@ -15,20 +15,26 @@ export function GoogleSignIn({ next }: { next?: string }) {
 				newUserCallbackURL: `${window.location.origin}/onboard`,
 			}),
 			{
-				loading: "Signing you in...",
-				error: "Failed to sign you in",
-				success: "Signed in successfully",
+				loading: "Signing You In…",
+				error:
+					"Couldn’t sign you in with Google. Check your connection and try again.",
+				success: "You’re signed in.",
 			}
 		);
 		setLoading(false);
 	}, [next]);
 
 	return (
-		<Button disabled={loading} onClick={handleSignIn} variant={"outline"}>
+		<Button
+			className={"h-12"}
+			disabled={loading}
+			onClick={handleSignIn}
+			variant={"outline"}
+		>
 			{loading ? (
-				"Signing you in"
+				"Signing You In…"
 			) : (
-				<span>
+				<span className="flex items-center gap-2">
 					<Google /> Continue with Google
 				</span>
 			)}

@@ -50,7 +50,7 @@ function ShellExamplesPage() {
 				className="grid gap-3 rounded-lg border bg-card p-4"
 			>
 				<h2 className="font-semibold" id="pull-heading">
-					Pull to refresh
+					Pull to Refresh
 				</h2>
 				<p className="text-muted-foreground text-sm">
 					On a touch screen, pull down from the top of this list to refresh it.
