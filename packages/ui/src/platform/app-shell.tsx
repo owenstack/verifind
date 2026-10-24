@@ -7,7 +7,6 @@ export interface AppShellProps {
 	isLoading?: boolean;
 	launchScreen?: ReactNode;
 	offlineHost?: ReactNode;
-	tabBar?: ReactNode;
 	topBar?: ReactNode;
 	updateHost?: ReactNode;
 }
@@ -15,7 +14,6 @@ export interface AppShellProps {
 export function AppShell({
 	children,
 	topBar,
-	tabBar,
 	launchScreen,
 	offlineHost,
 	updateHost,
@@ -42,11 +40,6 @@ export function AppShell({
 					{offlineHost}
 					{updateHost}
 				</aside>
-			) : null}
-			{tabBar ? (
-				<footer className="vf-app-shell__chrome vf-app-shell__tab-bar">
-					{tabBar}
-				</footer>
 			) : null}
 		</div>
 	);

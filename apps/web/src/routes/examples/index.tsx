@@ -1,6 +1,7 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getSession } from "@/lib/auth-client";
 import { readOfflineOwnerId } from "@/lib/offline-persistence";
+import { TransitionLink } from "@/platform/transition-link";
 
 export const Route = createFileRoute("/examples/")({
 	beforeLoad: async () => {
@@ -42,9 +43,7 @@ function OverviewPage() {
 	return (
 		<div className="mx-auto grid w-full max-w-3xl gap-6 p-4 sm:p-6">
 			<header className="grid gap-2">
-				<p className="text-muted-foreground text-sm">
-					VeriFind App Examples
-				</p>
+				<p className="text-muted-foreground text-sm">VeriFind App Examples</p>
 				<h1 className="font-semibold text-2xl">
 					Explore VeriFind’s App Features
 				</h1>
@@ -55,7 +54,7 @@ function OverviewPage() {
 			</header>
 			<div className="grid gap-3">
 				{examples.map((example, index) => (
-					<Link
+					<TransitionLink
 						className="grid gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-muted"
 						key={example.to}
 						to={example.to as string}
@@ -67,7 +66,7 @@ function OverviewPage() {
 						<span className="text-muted-foreground text-sm">
 							{example.description}
 						</span>
-					</Link>
+					</TransitionLink>
 				))}
 			</div>
 			<section

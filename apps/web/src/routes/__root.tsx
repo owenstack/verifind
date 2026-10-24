@@ -19,7 +19,6 @@ import { SplashController } from "@/platform/splash-controller";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 import { Toaster } from "@verifind/ui/components/toast";
-import { Footer } from "@/components/footer";
 import { Offline } from "@/components/offline";
 
 export interface RouterAppContext {
@@ -82,7 +81,6 @@ function PlatformShell({ children }: { children: ReactNode }) {
 
 	return (
 		<AppShell
-			tabBar={<Footer />}
 			updateHost={
 				updateAvailable ? (
 					<div
