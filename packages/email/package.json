@@ -6,7 +6,6 @@
     ".": "./src/index.tsx"
   },
   "scripts": {
-    "build": "email build",
     "dev": "email dev --dir='./src'",
     "export": "email export"
   },

@@ -19,6 +19,7 @@ import { SplashController } from "@/platform/splash-controller";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 import { Toaster } from "@verifind/ui/components/toast";
+import { Footer } from "@/components/footer";
 import { Offline } from "@/components/offline";
 
 export interface RouterAppContext {
@@ -81,16 +82,27 @@ function PlatformShell({ children }: { children: ReactNode }) {
 
 	return (
 		<AppShell
-			className="grid min-h-dvh"
+			tabBar={<Footer />}
 			updateHost={
 				updateAvailable ? (
-					<button
-						className="bg-primary px-4 py-2 text-primary-foreground"
-						onClick={applyUpdate}
-						type="button"
+					<div
+						className="mx-4 mt-4 flex items-center gap-3 rounded-2xl border bg-popover p-4 text-popover-foreground shadow-lg sm:mx-auto sm:max-w-sm"
+						role="status"
 					>
-						Update VeriFind
-					</button>
+						<div className="min-w-0 flex-1">
+							<p className="font-medium text-sm">Update Available</p>
+							<p className="text-muted-foreground text-sm">
+								Restart VeriFind to install the latest update.
+							</p>
+						</div>
+						<button
+							className="shrink-0 rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground text-sm"
+							onClick={applyUpdate}
+							type="button"
+						>
+							Restart App
+						</button>
+					</div>
 				) : null
 			}
 		>
@@ -98,28 +110,3 @@ function PlatformShell({ children }: { children: ReactNode }) {
 		</AppShell>
 	);
 }
-
-// function DemoTopBar() {
-// 	return (
-// 		<header className="flex items-center justify-between border-b bg-background px-4 py-3">
-// 			<Link className="font-semibold text-foreground" to="/" viewTransition>
-// 				VeriFind · Platform examples
-// 			</Link>
-// 			<span className="text-muted-foreground text-sm">Component showcase</span>
-// 		</header>
-// 	);
-// }
-
-// function DemoTabBar() {
-// 	return (
-// 		<nav
-// 			aria-label="Platform examples"
-// 			className="grid grid-cols-4 border-t bg-background"
-// 		>
-// 			<DemoNavLink to="/">Overview</DemoNavLink>
-// 			<DemoNavLink to="/platform">Shell</DemoNavLink>
-// 			<DemoNavLink to="/offline">Offline</DemoNavLink>
-// 			<DemoNavLink to="/capabilities">Capabilities</DemoNavLink>
-// 		</nav>
-// 	);
-// }

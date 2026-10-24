@@ -25,13 +25,17 @@ export function createAuth(
 	env: AuthConfig,
 	database: Database
 ): Auth<BetterAuthOptions> {
-	const isDev = env.NODE_ENV === "development";
-	const authBaseURL =
-		env.NODE_ENV === "production"
-			? "https://api.verifind.efobi.dev"
-			: env.BETTER_AUTH_URL;
+	const authURL = new URL(env.BETTER_AUTH_URL);
+	const isLocalAuthURL =
+		authURL.hostname === "localhost" || authURL.hostname === "127.0.0.1";
+	const isDev = env.NODE_ENV === "development" || isLocalAuthURL;
+	const authBaseURL = isDev
+		? env.BETTER_AUTH_URL
+		: "https://api.verifind.efobi.dev";
 	const appOrigins = isDev
 		? [
+				"http://localhost:*",
+				"http://127.0.0.1:*",
 				"http://localhost:3000",
 				"http://localhost:3001",
 				"http://localhost:3002",

@@ -2,7 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { getSession } from "@/lib/auth-client";
 import { readOfflineOwnerId } from "@/lib/offline-persistence";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/examples/")({
 	beforeLoad: async () => {
 		const session = await getSession();
 		const offlineSession =
@@ -20,9 +20,9 @@ export const Route = createFileRoute("/")({
 const examples = [
 	{
 		to: "/platform" as const,
-		title: "App Shell & Navigation",
+		title: "App Navigation & Layout",
 		description:
-			"Explore app navigation, back controls, bottom sheets, and pull to refresh.",
+			"Try the back controls, bottom sheets, and pull-to-refresh behavior.",
 	},
 	{
 		to: "/offline" as const,
@@ -34,7 +34,7 @@ const examples = [
 		to: "/capabilities" as const,
 		title: "Device Features",
 		description:
-			"Try vibration, sharing, screen wake, app badges, and image capture features.",
+			"Try vibration feedback, sharing, screen wake, app badges, and image capture.",
 	},
 ];
 
@@ -43,15 +43,14 @@ function OverviewPage() {
 		<div className="mx-auto grid w-full max-w-3xl gap-6 p-4 sm:p-6">
 			<header className="grid gap-2">
 				<p className="text-muted-foreground text-sm">
-					VeriFind Platform Examples
+					VeriFind App Examples
 				</p>
 				<h1 className="font-semibold text-2xl">
 					Explore VeriFind’s App Features
 				</h1>
 				<p className="max-w-prose text-muted-foreground">
-					Try the navigation, offline, and device features that support the
-					VeriFind experience. These interactive examples show how each feature
-					behaves on your device.
+					Explore navigation, offline access, and device features through these
+					interactive examples.
 				</p>
 			</header>
 			<div className="grid gap-3">
