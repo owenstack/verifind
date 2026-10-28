@@ -1,9 +1,16 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
+import { Button } from "@verifind/ui/components/button";
 import { Progress } from "@verifind/ui/components/progress";
 import { ArrowLeft } from "lucide-react";
+import { useCallback } from "react";
 import z from "zod";
+import { useStore } from "zustand";
+import { FirstStep } from "@/components/onboard/first-step";
+import { SecondStep } from "@/components/onboard/second-step";
+import { ThirdStep } from "@/components/onboard/third-step";
 import { stepStore } from "@/lib/store";
+import { FinalStep } from "@/components/onboard/final-step";
 
 export const Route = createFileRoute("/_secure/onboard")({
 	component: RouteComponent,
@@ -14,37 +21,62 @@ const formSchema = z.object({
 		.array(z.string())
 		.min(1, { error: "Choose at least one property type." }),
 	bedroom: z.enum(["1", "2", "3", "4+"]),
-	paymentType: z.enum(["standard", "financing"]),
+	paymentType: z.enum(["standard", "financing"], {
+		error: "Please select a payment plan",
+	}),
 	budget: z.number(),
-	location: z.object({ lat: z.number(), long: z.number() }),
+	location: z.object(
+		{ lat: z.number(), long: z.number() },
+		{ error: "Please set a location" }
+	),
 });
 
 function RouteComponent() {
-	const { step } = stepStore.getState();
+	const step = useStore(stepStore, (state) => state.step);
+	const setStep = useStore(stepStore, (state) => state.setStep);
 	const form = useForm({
 		defaultValues: {
 			propType: [] as string[],
 			bedroom: "1",
 			paymentType: "standard",
-			budget: 20_000_000,
-			location: { lat: 0, long: 0 },
+			budget: 100_000_000,
+			location: { lat: 6.6, long: 3.5 },
 		} as z.infer<typeof formSchema>,
 		validators: {
 			onChange: formSchema,
 		},
 	});
+	const goToPrevious = useCallback(() => {
+		setStep(step - 1);
+	}, [setStep, step]);
 
 	return (
 		<div className="flex flex-col gap-4 p-4">
-			<div className="grid gap-4">
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						{step > 0 && <ArrowLeft />}{" "}
-						<h2 className="font-semibold text-2xl leading-tight">VeriFind</h2>
+			{step < 3 && (
+				<div className="grid gap-4">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-2">
+							{step > 0 && (
+								<Button
+									onClick={goToPrevious}
+									size={"icon-lg"}
+									variant={"ghost"}
+								>
+									<ArrowLeft />
+								</Button>
+							)}
+							<h2 className="font-semibold text-2xl leading-tight">VeriFind</h2>
+						</div>
+						<span className="text-muted-foreground">Step {step + 1} of 3</span>
 					</div>
-					<span className="text-muted-foreground">Step {step + 1} of 4</span>
+					<Progress max={3} value={step + 1} />
 				</div>
-				<Progress max={4} value={step + 1} />
+			)}
+			<div className="w-full">
+				{step === 0 && <FirstStep form={form} />}
+				{step === 1 && <SecondStep form={form} />}
+				{step === 2 && <ThirdStep form={form} />}
+				{step === 3 && <FinalStep />}
 			</div>
 		</div>
 	);

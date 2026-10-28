@@ -1,11 +1,11 @@
 import { createStore } from "zustand";
 
-interface OnboardSteps {
+interface OnboardStepState {
 	setStep: (step: number) => void;
 	step: number;
 }
 
-export const stepStore = createStore<OnboardSteps>((set) => ({
+export const stepStore = createStore<OnboardStepState>((set) => ({
 	step: 0,
 	setStep: (step) => set({ step }),
 }));
