@@ -6,16 +6,18 @@
     "check-types": "tsc --noEmit",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
-    "dev": "alchemy dev"
+    "dev": "npm_execpath='' NODE_OPTIONS='' node ./node_modules/alchemy/bin/cli.js dev"
   },
   "dependencies": {
+    "@alchemy.run/axiom": "2.0.0-beta.84",
+    "@alchemy.run/cloudflare": "2.0.0-beta.84",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@effect/platform-bun": "4.0.5",
     "@effect/platform-node": "4.0.5",
     "@verifind/config": "workspace:*",
-    "alchemy": "2.0.0-beta.83",
+    "alchemy": "2.0.0-beta.84",
     "effect": "4.0.5",
     "typescript": "catalog:",
     "varlock": "catalog:"

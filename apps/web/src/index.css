@@ -1,2 +1,59 @@
 @import "@verifind/ui/globals.css";
 @import "@verifind/ui/platform.css";
+
+@property --onboard-progress {
+	syntax: "<integer>";
+	inherits: false;
+	initial-value: 0;
+}
+
+@property --onboard-width {
+	syntax: "<percentage>";
+	inherits: false;
+	initial-value: 0%;
+}
+
+.onboard-progress-count::after {
+	content: counter(onboard-progress) "%";
+	counter-reset: onboard-progress var(--onboard-progress);
+	animation: onboard-progress 2.3s linear forwards;
+}
+
+.onboard-progress-bar {
+	width: var(--onboard-width);
+	animation: onboard-width 2.3s linear forwards;
+}
+
+.onboard-message {
+	animation: onboard-message 600ms steps(1, end)
+		calc(var(--message-index) * 600ms) both;
+}
+
+@keyframes onboard-progress {
+	0% {
+		--onboard-progress: 0;
+	}
+	100% {
+		--onboard-progress: 100;
+	}
+}
+
+@keyframes onboard-width {
+	0% {
+		--onboard-width: 0%;
+	}
+	100% {
+		--onboard-width: 100%;
+	}
+}
+
+@keyframes onboard-message {
+	0%,
+	100% {
+		opacity: 0;
+	}
+	1%,
+	99% {
+		opacity: 1;
+	}
+}

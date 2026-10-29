@@ -77,8 +77,8 @@ function RouteComponent() {
 					</FieldTitle>
 					<FieldDescription>
 						{email
-							? `Enter the 6-digit code sent to ${email}.`
-							: "Enter the 6-digit code sent to your email."}
+							? `Enter the 6-digit code we sent to ${email}.`
+							: "Enter the 6-digit code we sent to your email."}
 					</FieldDescription>
 				</div>
 				<form
@@ -111,7 +111,7 @@ function RouteComponent() {
 													name={field.name}
 													onBlur={field.handleBlur}
 													onChange={(e) => field.handleChange(e.target.value)}
-													placeholder="Enter your first name…"
+													placeholder="Your first name…"
 													required
 													value={field.state.value}
 												/>
@@ -142,7 +142,7 @@ function RouteComponent() {
 													name={field.name}
 													onBlur={field.handleBlur}
 													onChange={(e) => field.handleChange(e.target.value)}
-													placeholder="Enter your surname…"
+													placeholder="Your surname…"
 													required
 													value={field.state.value}
 												/>
@@ -173,7 +173,7 @@ function RouteComponent() {
 											defaultValue={field.state.value}
 											id={field.name}
 											name={field.name}
-											placeholder="name@example.com…"
+											placeholder="you@example.com…"
 											required
 											type="email"
 										/>

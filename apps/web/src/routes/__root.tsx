@@ -35,7 +35,7 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
 			},
 			{
 				name: "description",
-				content: "Find verified rental homes with VeriFind.",
+				content: "Search rental homes with clear details on VeriFind.",
 			},
 		],
 		links: [
@@ -84,13 +84,13 @@ function PlatformShell({ children }: { children: ReactNode }) {
 			updateHost={
 				updateAvailable ? (
 					<div
-						className="mx-4 mt-4 flex items-center gap-3 rounded-2xl border bg-popover p-4 text-popover-foreground shadow-lg sm:mx-auto sm:max-w-sm"
+						className="absolute bottom-4 mx-4 mt-4 flex items-center gap-3 rounded-2xl border bg-popover p-4 text-popover-foreground shadow-lg sm:mx-auto sm:max-w-sm"
 						role="status"
 					>
 						<div className="min-w-0 flex-1">
 							<p className="font-medium text-sm">Update Available</p>
 							<p className="text-muted-foreground text-sm">
-								Restart VeriFind to install the latest update.
+								Restart VeriFind to finish installing the update.
 							</p>
 						</div>
 						<button
@@ -98,7 +98,7 @@ function PlatformShell({ children }: { children: ReactNode }) {
 							onClick={applyUpdate}
 							type="button"
 						>
-							Restart App
+							Restart VeriFind
 						</button>
 					</div>
 				) : null

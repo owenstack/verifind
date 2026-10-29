@@ -13,11 +13,10 @@ export function Offline() {
 				</div>
 				<div className="space-y-2">
 					<h1 className="font-semibold text-3xl tracking-tight sm:text-4xl">
-						You’re Offline
+						You’re offline
 					</h1>
 					<p className="text-base text-muted-foreground leading-relaxed">
-						Your internet connection is unavailable. Reconnect to keep browsing
-						verified homes and contacting landlords.
+						Reconnect to browse listings and contact property representatives.
 					</p>
 				</div>
 				<div className="flex w-full flex-col gap-3 pt-1">
@@ -26,7 +25,7 @@ export function Offline() {
 						onClick={() => window.location.reload()}
 						size="lg"
 					>
-						Retry Connection
+						Try Again
 					</Button>
 					<TransitionLink
 						className={buttonVariants({
@@ -36,12 +35,14 @@ export function Offline() {
 						})}
 						to="/saved"
 					>
-						View Saved Homes
+						View Saved Listings
 					</TransitionLink>
 				</div>
 				<p className="flex items-start justify-center gap-2 text-muted-foreground text-sm leading-relaxed">
 					<Info className="mt-0.5 size-4 shrink-0 text-primary" />
-					<span>Saved homes may be available if they were loaded earlier.</span>
+					<span>
+						Saved listings may be available if you opened them before.
+					</span>
 				</p>
 			</div>
 		</div>

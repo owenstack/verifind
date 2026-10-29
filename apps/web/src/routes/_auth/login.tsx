@@ -72,7 +72,7 @@ function RouteComponent() {
 							Welcome Back
 						</FieldTitle>
 						<FieldDescription className="text-base text-muted-foreground sm:text-lg">
-							Enter your email to get a sign-in code.
+							Enter your email address and we’ll send you a sign-in code.
 						</FieldDescription>
 					</div>
 					<FieldGroup className="gap-5">
@@ -103,7 +103,7 @@ function RouteComponent() {
 													name={field.name}
 													onBlur={field.handleBlur}
 													onChange={(e) => field.handleChange(e.target.value)}
-													placeholder="name@example.com…"
+													placeholder="you@example.com…"
 													required
 													type="email"
 												/>
@@ -120,7 +120,9 @@ function RouteComponent() {
 											className="h-11 w-full font-medium"
 											disabled={isSubmitting}
 										>
-											{isSubmitting ? "Sending Code…" : "Send Sign-In Code"}
+											{isSubmitting
+												? "Sending Code…"
+												: "Email Me a Sign-In Code"}
 										</Button>
 									)}
 								</form.Subscribe>
@@ -136,7 +138,7 @@ function RouteComponent() {
 							Don’t have an account?
 						</span>
 						<TransitionLink className="font-medium text-primary" to="/signup">
-							Create an Account
+							Create Account
 						</TransitionLink>
 					</FieldDescription>
 				</FieldSet>

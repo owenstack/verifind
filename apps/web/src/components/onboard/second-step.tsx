@@ -56,7 +56,7 @@ export function SecondStep({ form }: { form: any }) {
 					What’s Your Budget?
 				</FieldTitle>
 				<FieldDescription className="text-base leading-6">
-					Choose how you plan to pay for rent
+					Choose a payment option and set your rent budget.
 				</FieldDescription>
 			</div>
 			<form.Field name="paymentType">
@@ -65,7 +65,7 @@ export function SecondStep({ form }: { form: any }) {
 						field.state.meta.isTouched && !field.state.meta.isValid;
 					return (
 						<Field data-invalid={isInvalid}>
-							<FieldLabel htmlFor={field.name}>Payment Type</FieldLabel>
+							<FieldLabel htmlFor={field.name}>Payment Option</FieldLabel>
 							<RadioGroup
 								id={field.name}
 								name={field.name}
@@ -137,10 +137,10 @@ export function SecondStep({ form }: { form: any }) {
 			</form.Field>
 			<div className="flex items-center justify-between">
 				<TransitionLink className={buttonVariants({ variant: "link" })} to="/">
-					Skip
+					Skip For Now
 				</TransitionLink>
 				<Button onClick={goToNextStep} size="lg" type="button">
-					Continue &rarr;
+					Continue
 				</Button>
 			</div>
 		</FieldGroup>

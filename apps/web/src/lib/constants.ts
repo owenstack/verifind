@@ -9,6 +9,7 @@ import {
 	Search,
 	User,
 } from "lucide-react";
+import lgas from "@/assets/lga.json";
 
 interface NavLink {
 	icon: LucideIcon;
@@ -81,19 +82,19 @@ export const onboarding: OnboardingForm = {
 		{
 			value: "single",
 			title: "Single Room",
-			description: "A single room or self-contained unit",
+			description: "A room in a shared home or a self-contained unit",
 			icon: DoorClosed,
 		},
 		{
 			value: "apartment",
 			title: "Apartment",
-			description: "A mini-flat or an apartment with 1–3 bedrooms",
+			description: "A mini flat or an apartment with 1–3 bedrooms",
 			icon: HousePlus,
 		},
 		{
 			value: "house",
-			title: "Whole House or Bungalow",
-			description: "Duplex or bungalow",
+			title: "House or Bungalow",
+			description: "A full house, duplex, or bungalow",
 			icon: Building2,
 		},
 	],
@@ -106,13 +107,35 @@ export const onboarding: OnboardingForm = {
 	paymentType: [
 		{
 			value: "standard",
-			title: "Standard – Annually",
-			description: "Pay rent yearly",
+			title: "Annual Rent",
+			description: "Pay rent once a year",
 		},
 		{
 			value: "financing",
-			title: "Rent Financing",
-			description: "Monthly, subject to eligibility",
+			title: "Monthly Rent Financing",
+			description: "Pay monthly if you qualify",
 		},
 	],
 };
+
+export function nearestLGA({
+	latitude,
+	longitude,
+}: {
+	latitude: number;
+	longitude: number;
+}) {
+	return lgas.reduce((nearest, lga) => {
+		const latitudeDifference = lga.latitude - latitude;
+		const longitudeDifference = lga.longitude - longitude;
+		const nearestLatitudeDifference = nearest.latitude - latitude;
+		const nearestLongitudeDifference = nearest.longitude - longitude;
+		const distance = latitudeDifference ** 2 + longitudeDifference ** 2;
+		const nearestDistance =
+			nearestLatitudeDifference ** 2 + nearestLongitudeDifference ** 2;
+
+		return distance < nearestDistance ? lga : nearest;
+	});
+}
+
+export const getLgaLabel = (lga: LGA) => `${lga.name}, ${lga.state_name}`;

@@ -33,7 +33,7 @@ export function FirstStep({ form }: { form: any }) {
 					What Type of Home Are You Looking For?
 				</FieldTitle>
 				<FieldDescription className="text-base leading-6">
-					Choose one or more property types. You can change this later.
+					Select all the home types you’d consider. You can update this later.
 				</FieldDescription>
 			</div>
 			<form.Field name="propType">
@@ -124,10 +124,10 @@ export function FirstStep({ form }: { form: any }) {
 			</form.Field>
 			<div className="flex items-center justify-between">
 				<TransitionLink className={buttonVariants({ variant: "link" })} to="/">
-					Skip
+					Skip For Now
 				</TransitionLink>
 				<Button onClick={goToNextStep} size="lg" type="button">
-					Continue &rarr;
+					Continue
 				</Button>
 			</div>
 		</FieldGroup>

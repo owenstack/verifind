@@ -6,11 +6,11 @@ import { ArrowLeft } from "lucide-react";
 import { useCallback } from "react";
 import z from "zod";
 import { useStore } from "zustand";
+import { FinalStep } from "@/components/onboard/final-step";
 import { FirstStep } from "@/components/onboard/first-step";
 import { SecondStep } from "@/components/onboard/second-step";
 import { ThirdStep } from "@/components/onboard/third-step";
-import { stepStore } from "@/lib/store";
-import { FinalStep } from "@/components/onboard/final-step";
+import { filterStore, stepStore } from "@/lib/store";
 
 export const Route = createFileRoute("/_secure/onboard")({
 	component: RouteComponent,
@@ -22,16 +22,17 @@ const formSchema = z.object({
 		.min(1, { error: "Choose at least one property type." }),
 	bedroom: z.enum(["1", "2", "3", "4+"]),
 	paymentType: z.enum(["standard", "financing"], {
-		error: "Please select a payment plan",
+		error: "Choose a payment option to continue.",
 	}),
 	budget: z.number(),
 	location: z.object(
 		{ lat: z.number(), long: z.number() },
-		{ error: "Please set a location" }
+		{ error: "Choose an area to continue." }
 	),
 });
 
 function RouteComponent() {
+	const { setFilter } = filterStore.getState();
 	const step = useStore(stepStore, (state) => state.step);
 	const setStep = useStore(stepStore, (state) => state.setStep);
 	const form = useForm({
@@ -44,6 +45,10 @@ function RouteComponent() {
 		} as z.infer<typeof formSchema>,
 		validators: {
 			onChange: formSchema,
+		},
+		onSubmit: ({ value }) => {
+			setFilter(value);
+			setStep(3);
 		},
 	});
 	const goToPrevious = useCallback(() => {

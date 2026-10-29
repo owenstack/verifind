@@ -1,7 +1,8 @@
 /** biome-ignore-all lint/performance/noNamespaceImport: <effect> */
+
+import * as Axiom from "@alchemy.run/axiom";
+import * as Cloudflare from "@alchemy.run/cloudflare";
 import * as Alchemy from "alchemy";
-import * as Axiom from "alchemy/Axiom";
-import * as Cloudflare from "alchemy/Cloudflare";
 import * as Output from "alchemy/Output";
 import * as Config from "effect/Config";
 import * as Effect from "effect/Effect";
@@ -83,10 +84,18 @@ export const server = Cloudflare.Worker("server", {
 
 export type ServerEnv = Cloudflare.InferEnv<typeof server>;
 
+// Profile commands only need the auth-provider registry, which Alchemy loads
+// separately. Building Axiom's resource provider layer here eagerly resolves
+// the Axiom credentials before `profile edit` can configure them.
+const providers =
+	process.argv[2] === "profile"
+		? Cloudflare.providers()
+		: Layer.mergeAll(Cloudflare.providers(), Axiom.providers());
+
 export default Alchemy.Stack(
 	"verifind",
 	{
-		providers: Layer.mergeAll(Cloudflare.providers(), Axiom.providers()),
+		providers,
 		state: Cloudflare.state(),
 	},
 	Effect.gen(function* () {

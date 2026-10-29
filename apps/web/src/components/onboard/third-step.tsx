@@ -20,42 +20,25 @@ import { InputGroupAddon } from "@verifind/ui/components/input-group";
 import { Locate, Search } from "lucide-react";
 import { useCallback, useState } from "react";
 import lgas from "@/assets/lga.json";
-import type { LGA } from "@/lib/constants";
-import { stepStore } from "@/lib/store";
+import { getLgaLabel, type LGA, nearestLGA } from "@/lib/constants";
 import { TransitionLink } from "@/platform/transition-link";
-
-const getLgaLabel = (lga: LGA) => `${lga.name}, ${lga.state_name}`;
 
 // biome-ignore lint/suspicious/noExplicitAny: <@tanstack/react-form>
 export function ThirdStep({ form }: { form: any }) {
-	const { setStep } = stepStore.getState();
 	const [locationError, setLocationError] = useState<string | null>(null);
 	const goToNextStep = useCallback(() => {
-		setStep(3);
 		form.handleSubmit();
-	}, [setStep, form.handleSubmit]);
+	}, [form.handleSubmit]);
 	const getLocation = (field: AnyFieldApi) => {
 		setLocationError(null);
 		if (!navigator.geolocation) {
-			setLocationError("Location is not available in this browser.");
+			setLocationError("Your browser doesn’t support location access.");
 			return;
 		}
 
 		navigator.geolocation.getCurrentPosition(
 			({ coords }) => {
-				const nearestLga = lgas.reduce((nearest, lga) => {
-					const latitudeDifference = lga.latitude - coords.latitude;
-					const longitudeDifference = lga.longitude - coords.longitude;
-					const nearestLatitudeDifference = nearest.latitude - coords.latitude;
-					const nearestLongitudeDifference =
-						nearest.longitude - coords.longitude;
-					const distance = latitudeDifference ** 2 + longitudeDifference ** 2;
-					const nearestDistance =
-						nearestLatitudeDifference ** 2 + nearestLongitudeDifference ** 2;
-
-					return distance < nearestDistance ? lga : nearest;
-				});
-
+				const nearestLga = nearestLGA(coords);
 				field.setValue({
 					lat: nearestLga.latitude,
 					long: nearestLga.longitude,
@@ -63,7 +46,7 @@ export function ThirdStep({ form }: { form: any }) {
 			},
 			() =>
 				setLocationError(
-					"Could not get your location. Check your permission and try again."
+					"We couldn’t access your location. Check your browser permission or search for an area."
 				),
 			{ enableHighAccuracy: false, timeout: 10_000, maximumAge: 60_000 }
 		);
@@ -73,10 +56,10 @@ export function ThirdStep({ form }: { form: any }) {
 		<FieldGroup className="gap-8">
 			<div className="space-y-2">
 				<FieldTitle className="font-semibold text-2xl tracking-tight sm:text-3xl">
-					Where do you want to live?
+					Where Do You Want to Live?
 				</FieldTitle>
 				<FieldDescription className="text-base leading-6">
-					Choose an area to help us find nearby properties
+					Choose where you want to search for homes.
 				</FieldDescription>
 			</div>
 			<form.Field name="location">
@@ -103,18 +86,16 @@ export function ThirdStep({ form }: { form: any }) {
 									<Field data-invalid={isInvalid} orientation={"horizontal"}>
 										<Locate className="size-8 shrink-0 self-center text-primary" />
 										<FieldContent>
-											<FieldTitle>Use my current location</FieldTitle>
+											<FieldTitle>Use My Current Location</FieldTitle>
 											<FieldDescription>
 												{locationError ??
-													"We will ask permission to access location"}
+													"Allow location access to find nearby areas."}
 											</FieldDescription>
 										</FieldContent>
 									</Field>
 								</FieldLabel>
 								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>
-										Or search manually
-									</FieldLabel>
+									<FieldLabel htmlFor={field.name}>Search Manually</FieldLabel>
 									<Combobox
 										items={lgas}
 										itemToStringLabel={getLgaLabel}
@@ -123,14 +104,16 @@ export function ThirdStep({ form }: { form: any }) {
 									>
 										<ComboboxInput
 											aria-invalid={isInvalid}
-											placeholder="Search city or neighborhood"
+											placeholder="Search a city or neighborhood…"
 										>
 											<InputGroupAddon>
 												<Search />
 											</InputGroupAddon>
 										</ComboboxInput>
 										<ComboboxContent>
-											<ComboboxEmpty>No LGAs found</ComboboxEmpty>
+											<ComboboxEmpty>
+												No areas found. Try another search.
+											</ComboboxEmpty>
 											<ComboboxList>
 												{(lga: LGA) => (
 													<ComboboxItem key={lga.id} value={lga}>
@@ -142,7 +125,7 @@ export function ThirdStep({ form }: { form: any }) {
 									</Combobox>
 								</Field>
 								<Field>
-									<FieldLabel>Popular searches</FieldLabel>
+									<FieldLabel>Suggested Areas</FieldLabel>
 									<FieldGroup>
 										<Button
 											onClick={() =>
@@ -178,10 +161,10 @@ export function ThirdStep({ form }: { form: any }) {
 			</form.Field>
 			<div className="flex items-center justify-between">
 				<TransitionLink className={buttonVariants({ variant: "link" })} to="/">
-					Skip
+					Skip For Now
 				</TransitionLink>
 				<Button onClick={goToNextStep} size="lg" type="submit">
-					Complete &rarr;
+					Finish Setup
 				</Button>
 			</div>
 		</FieldGroup>
