@@ -21,6 +21,11 @@ initLogger({
 	env: { service: "verifind-server" },
 });
 
+// Axiom credentials are provisioned by Alchemy in production; skip the
+// drain in local development so requests do not log drain errors.
+const axiomDrain =
+	ENV.AXIOM_API_KEY && ENV.AXIOM_DATASET ? createAxiomDrain() : undefined;
+
 const identifyUser = createAuthMiddleware(
 	(await createAuth()) as BetterAuthInstance,
 	{
@@ -56,7 +61,7 @@ app.use(
 		credentials: true,
 	})
 );
-app.use(evlog({ drain: createAxiomDrain() }));
+app.use(evlog({ drain: axiomDrain }));
 
 app.use("*", async (c, next) => {
 	await identifyUser(c.get("log"), c.req.raw.headers, c.req.path);

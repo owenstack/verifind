@@ -101,12 +101,19 @@ export function createAuth(
 				expiresIn: 300,
 				allowedAttempts: 5,
 				async sendVerificationOTP({ email, otp, type }) {
-					if (type === "sign-in") {
-						await sendSignInOTPEmail({
-							apiKey: env.RESEND_API_KEY,
-							props: { email, otp },
-						});
+					if (type !== "sign-in") {
+						return;
 					}
+					if (!env.RESEND_API_KEY) {
+						// Local/dev fallback: without a Resend key, surface the
+						// OTP in the server log so local sign-in still works.
+						console.warn(`[verifind][dev] Sign-in OTP for ${email}: ${otp}`);
+						return;
+					}
+					await sendSignInOTPEmail({
+						apiKey: env.RESEND_API_KEY,
+						props: { email, otp },
+					});
 				},
 			}),
 		],
