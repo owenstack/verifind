@@ -1,0 +1,9 @@
+# Copy to .dev.vars and fill in values for local `bunx wrangler dev`.
+BETTER_AUTH_SECRET=<random 32+ chars>
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+RESEND_API_KEY=
+# Generate with: bun run apps/server/scripts/generate-vapid-keys.ts
+VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
+VAPID_SUBJECT=mailto:dev@example.com

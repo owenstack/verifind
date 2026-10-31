@@ -21,6 +21,18 @@ const splashLogo = readFileSync(
 export default defineConfig({
 	server: {
 		port: 3001,
+		// Same-origin dev API: when VITE_SERVER_URL is empty the app calls
+		// /rpc and /api relatively; forward them to the local worker.
+		proxy: {
+			"/api": {
+				changeOrigin: true,
+				target: process.env.VERIFIND_API_TARGET ?? "http://localhost:8787",
+			},
+			"/rpc": {
+				changeOrigin: true,
+				target: process.env.VERIFIND_API_TARGET ?? "http://localhost:8787",
+			},
+		},
 	},
 	resolve: {
 		tsconfigPaths: true,
@@ -55,6 +67,8 @@ export default defineConfig({
 			workbox: {
 				globPatterns: ["**/*.{js,css,html,png,svg,ico,webmanifest}"],
 				globIgnores: ["**/apple-splash-*.png"],
+				// Custom push handlers loaded into the generated worker.
+				importScripts: ["/push-sw.js"],
 				runtimeCaching: [
 					{
 						urlPattern: ({ url }) =>

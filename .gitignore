@@ -57,3 +57,5 @@ coverage
 tmp
 temp
 *.md
+.dev.vars
+.wrangler/

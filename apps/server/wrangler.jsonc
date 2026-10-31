@@ -1,0 +1,29 @@
+// Local development configuration for running the API worker with
+// `bunx wrangler dev` — production uses Alchemy (packages/infra), not
+// this file. See apps/server/.dev.vars.example for required secrets.
+{
+        "$schema": "https://unpkg.com/wrangler/config-schema.json",
+        "name": "verifind-server-dev",
+        "main": "src/index.ts",
+        "compatibility_date": "2026-10-01",
+        "compatibility_flags": ["nodejs_compat"],
+        "dev": {
+                "port": 8787
+        },
+        "d1_databases": [
+                {
+                        "binding": "DB",
+                        "database_name": "verifind-local",
+                        "database_id": "verifind-local",
+                        "migrations_dir": "../../packages/db/src/migrations",
+                        "migrations_pattern": "../../packages/db/src/migrations/*/migration.sql"
+                }
+        ],
+        "vars": {
+                "NODE_ENV": "development",
+                "BETTER_AUTH_URL": "http://localhost:3001"
+        },
+        "observability": {
+                "enabled": false
+        }
+}
