@@ -1,9 +1,10 @@
-import type { ReactNode } from "react";
+import type { ReactNode, Ref } from "react";
 import { useVisualViewport } from "../hooks/use-visual-viewport";
 
 export interface AppShellProps {
 	children: ReactNode;
 	className?: string;
+	contentRef?: Ref<HTMLElement>;
 	isLoading?: boolean;
 	launchScreen?: ReactNode;
 	offlineHost?: ReactNode;
@@ -19,6 +20,7 @@ export function AppShell({
 	updateHost,
 	isLoading = false,
 	className,
+	contentRef,
 }: AppShellProps) {
 	const { keyboardOpen } = useVisualViewport();
 	const classNames = ["vf-app-shell", className].filter(Boolean).join(" ");
@@ -30,7 +32,7 @@ export function AppShell({
 					{topBar}
 				</header>
 			) : null}
-			<main className="vf-app-shell__content">
+			<main className="vf-app-shell__content" ref={contentRef}>
 				<ShellContent isLoading={isLoading} launchScreen={launchScreen}>
 					{children}
 				</ShellContent>

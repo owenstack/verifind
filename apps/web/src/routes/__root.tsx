@@ -6,12 +6,14 @@ import {
 	createRootRouteWithContext,
 	HeadContent,
 	Outlet,
+	useRouter,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { AppRouterClient } from "@verifind/api/routers/index";
 import { AppShell } from "@verifind/ui/platform/app-shell";
 import { PageTransition } from "@verifind/ui/platform/page-transition";
-import { type ReactNode, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { type ReactNode, useCallback, useState } from "react";
 import { ThemeProvider } from "@/components/theme-provider";
 import { useOfflineStatus } from "@/lib/use-offline-status";
 import { PwaUpdateProvider, usePwaUpdates } from "@/platform/pwa-updates";
@@ -19,6 +21,7 @@ import { SplashController } from "@/platform/splash-controller";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 import { Toaster } from "@verifind/ui/components/toast";
+import { usePullToRefresh } from "@verifind/ui/hooks/use-pull-to-refresh";
 import { Offline } from "@/components/offline";
 
 export interface RouterAppContext {
@@ -76,11 +79,21 @@ function RootComponent() {
 }
 
 function PlatformShell({ children }: { children: ReactNode }) {
+	const router = useRouter();
 	const offline = useOfflineStatus();
 	const { updateAvailable, applyUpdate } = usePwaUpdates();
+	const refresh = useCallback(async () => {
+		await Promise.all([
+			router.invalidate(),
+			router.options.context.queryClient.invalidateQueries(),
+		]);
+	}, [router]);
+	const pull = usePullToRefresh({ refresh });
+	const pullStatusLabel = getPullStatusLabel(pull.refreshing, pull.ready);
 
 	return (
 		<AppShell
+			contentRef={pull.elementRef}
 			updateHost={
 				updateAvailable ? (
 					<div
@@ -104,7 +117,27 @@ function PlatformShell({ children }: { children: ReactNode }) {
 				) : null
 			}
 		>
+			<div
+				aria-hidden="true"
+				className="vf-pull-refresh-indicator"
+				data-ready={pull.ready || undefined}
+				data-refreshing={pull.refreshing || undefined}
+				ref={pull.indicatorRef}
+			>
+				<RefreshCw className="vf-pull-refresh-indicator__icon" size={16} />
+				<span>{pullStatusLabel}</span>
+			</div>
+			<div aria-live="polite" className="sr-only" role="status">
+				{pull.refreshing ? "Refreshing page…" : ""}
+			</div>
 			{offline.isOnline ? children : <Offline />}
 		</AppShell>
 	);
+}
+
+function getPullStatusLabel(refreshing: boolean, ready: boolean) {
+	if (refreshing) {
+		return "Refreshing…";
+	}
+	return ready ? "Release to refresh" : "Pull to refresh";
 }

@@ -20,6 +20,7 @@ export function AgentInfo() {
 	return (
 		<Drawer>
 			<DrawerTrigger
+				nativeButton={false}
 				render={
 					<Item className="bg-accent/40">
 						<ItemMedia>

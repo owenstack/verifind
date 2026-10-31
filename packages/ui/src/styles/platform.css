@@ -57,6 +57,68 @@ textarea {
 	overscroll-behavior-y: contain;
 }
 
+.vf-pull-refresh-indicator {
+	position: absolute;
+	top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+	left: 50%;
+	z-index: 20;
+	display: flex;
+	gap: 0.5rem;
+	align-items: center;
+	padding: 0.5rem 0.75rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--foreground);
+	white-space: nowrap;
+	pointer-events: none;
+	background: var(--background);
+	border: 1px solid var(--border);
+	border-radius: 9999px;
+	box-shadow: 0 4px 12px rgb(0 0 0 / 0.12);
+	opacity: 0;
+	transform: translate3d(-50%, 0, 0);
+	transition:
+		transform 180ms var(--vf-motion-easing-standard),
+		opacity 120ms var(--vf-motion-easing-standard);
+}
+
+.vf-pull-refresh-indicator[data-dragging] {
+	transition: none;
+}
+
+.vf-pull-refresh-indicator[data-ready] {
+	color: var(--primary);
+}
+
+.vf-pull-refresh-indicator__icon {
+	flex: none;
+	transition: transform 160ms var(--vf-motion-easing-standard);
+}
+
+.vf-pull-refresh-indicator[data-ready] .vf-pull-refresh-indicator__icon {
+	transform: rotate(180deg);
+}
+
+.vf-pull-refresh-indicator[data-refreshing] .vf-pull-refresh-indicator__icon {
+	animation: vf-pull-refresh-spin 800ms linear infinite;
+}
+
+@keyframes vf-pull-refresh-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.vf-pull-refresh-indicator__icon {
+		transition: none;
+	}
+
+	.vf-pull-refresh-indicator[data-refreshing] .vf-pull-refresh-indicator__icon {
+		animation: none;
+	}
+}
+
 .vf-app-shell__status-host {
 	position: absolute;
 	inset-inline: 0;

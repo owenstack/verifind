@@ -20,19 +20,19 @@ export const Route = createFileRoute("/examples/")({
 
 const examples = [
 	{
-		to: "/platform" as const,
+		to: "/examples/platform" as const,
 		title: "App Navigation & Layout",
 		description:
 			"Try the back controls, bottom sheets, and pull-to-refresh behavior.",
 	},
 	{
-		to: "/offline" as const,
+		to: "/examples/offline" as const,
 		title: "Offline Access & Drafts",
 		description:
 			"Check your connection, save a private draft, and see when updates are ready.",
 	},
 	{
-		to: "/capabilities" as const,
+		to: "/examples/capabilities" as const,
 		title: "Device Features",
 		description:
 			"Try vibration feedback, sharing, screen wake, app badges, and image capture.",

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@verifind/ui/components/button";
-import { usePullToRefresh } from "@verifind/ui/hooks/use-pull-to-refresh";
 import { AppBackButton } from "@verifind/ui/platform/app-back-button";
 import { BottomSheet } from "@verifind/ui/platform/bottom-sheet";
 import { useCallback, useState } from "react";
@@ -13,16 +12,9 @@ export const Route = createFileRoute("/examples/platform")({
 
 function ShellExamplesPage() {
 	const [sheetOpen, setSheetOpen] = useState(false);
-	const [refreshCount, setRefreshCount] = useState(0);
 	const goBack = useAppBack("/");
 	const openSheet = useCallback(() => setSheetOpen(true), []);
 	const closeSheet = useCallback(() => setSheetOpen(false), []);
-	const refresh = useCallback(async () => {
-		await new Promise((resolve) => window.setTimeout(resolve, 400));
-		setRefreshCount((count) => count + 1);
-	}, []);
-	const pull = usePullToRefresh({ refresh });
-	const rows = ["One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight"];
 
 	return (
 		<div className="mx-auto grid w-full max-w-3xl gap-6 p-4 sm:p-6">
@@ -54,42 +46,9 @@ function ShellExamplesPage() {
 					Pull to Refresh
 				</h2>
 				<p className="text-muted-foreground text-sm">
-					On a touch screen, pull down from the top of this list to refresh it.
-					You can also use the button below.
+					On a touch screen, pull down from the top of any page to refresh its
+					route data. The gesture works throughout the app.
 				</p>
-				<section
-					aria-label="Pull to refresh example"
-					className="max-h-48 overflow-auto rounded-md border bg-background p-4"
-					data-pull-distance={pull.pullDistance}
-					ref={pull.elementRef}
-				>
-					<p aria-live="polite" className="text-primary text-sm">
-						{pull.refreshing
-							? "Refreshing…"
-							: `Refreshed ${refreshCount} time${refreshCount === 1 ? "" : "s"}`}
-					</p>
-					{rows.map((row) => (
-						<p
-							className="border-b py-4 text-muted-foreground text-sm"
-							key={row}
-						>
-							Sample list item {row}
-						</p>
-					))}
-				</section>
-				<Button
-					disabled={pull.refreshing}
-					onClick={refresh}
-					type="button"
-					variant="outline"
-				>
-					{pull.refreshing ? "Refreshing…" : "Refresh List"}
-				</Button>
-				<CodeExample>
-					{
-						"const pull = usePullToRefresh({ refresh });\n<div ref={pull.elementRef}>…</div>"
-					}
-				</CodeExample>
 			</section>
 
 			<section
