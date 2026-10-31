@@ -1,3 +1,4 @@
+// biome-ignore-all lint/performance/noJsxPropsBind: TanStack field handlers must capture the active field instance.
 import { type AnyFieldApi, useForm } from "@tanstack/react-form";
 import { Button } from "@verifind/ui/components/button";
 import {
@@ -25,7 +26,7 @@ import {
 } from "@verifind/ui/components/field";
 import { InputGroupAddon } from "@verifind/ui/components/input-group";
 import { Locate, MapPin, Search } from "lucide-react";
-import { useState } from "react";
+import { type FormEvent, useState } from "react";
 import z from "zod";
 import { useStore } from "zustand";
 import lgas from "@/assets/lga.json";
@@ -35,10 +36,10 @@ import { filterStore } from "@/lib/store";
 export function LocationFilter() {
 	const coords = useStore(filterStore, (state) => state.filter.location);
 	const setFilter = useStore(filterStore, (state) => state.setFilter);
-	const lga = coords
+	const currentLga = coords
 		? nearestLGA({ latitude: coords.lat, longitude: coords.long })
 		: lgas[0];
-	const address = getLgaLabel(lga);
+	const address = getLgaLabel(currentLga);
 	const [open, setOpen] = useState(false);
 	const [locationError, setLocationError] = useState<string | null>(null);
 	const getLocation = (field: AnyFieldApi) => {
@@ -49,8 +50,8 @@ export function LocationFilter() {
 		}
 
 		navigator.geolocation.getCurrentPosition(
-			({ coords }) => {
-				const nearestLga = nearestLGA(coords);
+			(position) => {
+				const nearestLga = nearestLGA(position.coords);
 				field.setValue({
 					lat: nearestLga.latitude,
 					long: nearestLga.longitude,
@@ -66,8 +67,8 @@ export function LocationFilter() {
 	const form = useForm({
 		defaultValues: {
 			location: {
-				lat: lga.latitude,
-				long: lga.longitude,
+				lat: currentLga.latitude,
+				long: currentLga.longitude,
 			},
 		},
 		validators: {
@@ -84,6 +85,11 @@ export function LocationFilter() {
 			setOpen(false);
 		},
 	});
+	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+		event.preventDefault();
+		form.handleSubmit();
+	};
+	const selectIsSubmitting = (state: typeof form.state) => state.isSubmitting;
 
 	return (
 		<Drawer onOpenChange={setOpen} open={open}>
@@ -98,37 +104,38 @@ export function LocationFilter() {
 				<DrawerHeader className="">
 					<DrawerTitle>Choose an area</DrawerTitle>
 				</DrawerHeader>
-				<form
-					className="mt-4 w-full"
-					onSubmit={(e) => {
-						e.preventDefault();
-						form.handleSubmit();
-					}}
-				>
+				<form className="mt-4 w-full" onSubmit={handleSubmit}>
 					<FieldGroup>
 						<form.Field name="location">
 							{(field) => {
 								const isInvalid =
 									field.state.meta.isTouched && !field.state.meta.isValid;
 								const selectedLga = lgas.find(
-									(lga) =>
-										lga.latitude === field.state.value?.lat &&
-										lga.longitude === field.state.value?.long
+									(candidate) =>
+										candidate.latitude === field.state.value?.lat &&
+										candidate.longitude === field.state.value?.long
 								);
-								const handleLgaChange = (lga: LGA | null) => {
-									if (lga) {
+								const handleLgaChange = (candidate: LGA | null) => {
+									if (candidate) {
 										field.handleChange({
-											lat: lga.latitude,
-											long: lga.longitude,
+											lat: candidate.latitude,
+											long: candidate.longitude,
 										});
 									}
 								};
+								const handleUseLocation = () => getLocation(field);
+								const setIbejuLekki = () =>
+									field.setValue({ lat: 6.416_667, long: 2.883_333 });
+								const setSurulere = () =>
+									field.setValue({ lat: 6.5, long: 3.35 });
+								const setPortHarcourt = () =>
+									field.setValue({ lat: 4.824_166_67, long: 7.033_611_11 });
 								return (
 									<Field data-invalid={isInvalid}>
 										<FieldGroup className="space-y-4">
 											<FieldLabel
 												htmlFor={field.name}
-												onClick={() => getLocation(field)}
+												onClick={handleUseLocation}
 											>
 												<Field
 													data-invalid={isInvalid}
@@ -139,7 +146,7 @@ export function LocationFilter() {
 														<FieldTitle>Use Current Location</FieldTitle>
 														<FieldDescription>
 															{locationError ??
-																"Allow location access to find nearby areas."}
+																"Allow location access to use this option."}
 														</FieldDescription>
 													</FieldContent>
 												</Field>
@@ -179,37 +186,16 @@ export function LocationFilter() {
 											<Field>
 												<FieldLabel>Suggested Areas</FieldLabel>
 												<FieldGroup>
-													<Button
-														onClick={() =>
-															field.setValue({
-																lat: 6.416_667,
-																long: 2.883_333,
-															})
-														}
-														variant={"outline"}
-													>
+													<Button onClick={setIbejuLekki} variant={"outline"}>
 														Ibeju-Lekki, Lagos
 													</Button>
-													<Button
-														onClick={() =>
-															field.setValue({ lat: 6.5, long: 3.35 })
-														}
-														variant={"outline"}
-													>
+													<Button onClick={setSurulere} variant={"outline"}>
 														Surulere, Lagos
 													</Button>
-													<Button
-														onClick={() =>
-															field.setValue({
-																lat: 4.824_166_67,
-																long: 7.033_611_11,
-															})
-														}
-														variant={"outline"}
-													>
+													<Button onClick={setPortHarcourt} variant={"outline"}>
 														Port Harcourt, Rivers
 													</Button>
-													<form.Subscribe selector={(s) => s.isSubmitting}>
+													<form.Subscribe selector={selectIsSubmitting}>
 														{(isSubmitting) => (
 															<Button
 																className={"mb-8 w-full"}
@@ -217,8 +203,8 @@ export function LocationFilter() {
 																type="submit"
 															>
 																{isSubmitting
-																	? "Setting location…"
-																	: "Use this location"}
+																	? "Applying Location…"
+																	: "Apply Location"}
 															</Button>
 														)}
 													</form.Subscribe>

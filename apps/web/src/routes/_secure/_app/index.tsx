@@ -6,9 +6,10 @@ import {
 	InputGroupButton,
 	InputGroupInput,
 } from "@verifind/ui/components/input-group";
-import { Bell, Mic, Search, Settings2 } from "lucide-react";
-import { AgentInfo } from "@/components/others/agent-info";
-import { LocationFilter } from "@/components/others/location";
+import { Mic, Search, Settings2 } from "lucide-react";
+import { AgentInfo } from "@/components/home/agent-info";
+import { LocationFilter } from "@/components/home/location";
+import { Notifications } from "@/components/home/notifications";
 
 export const Route = createFileRoute("/_secure/_app/")({
 	component: RouteComponent,
@@ -20,9 +21,7 @@ function RouteComponent() {
 		<main className="grid gap-4 px-4 py-2">
 			<div className="flex items-center justify-between gap-4">
 				<LocationFilter />
-				<Button aria-label="Notifications" variant={"ghost"}>
-					<Bell />
-				</Button>
+				<Notifications />
 			</div>
 			<div className="flex flex-col items-start gap-2">
 				<h1 className="font-semibold text-2xl">
