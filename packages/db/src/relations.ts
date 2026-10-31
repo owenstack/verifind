@@ -2,13 +2,29 @@ import { defineRelations, defineRelationsPart } from "drizzle-orm";
 import {
 	account,
 	authRelations,
+	notification,
+	notificationRelations,
 	passkey,
+	property,
+	propertyRelations,
+	pushSubscription,
+	savedProperty,
 	session,
 	user,
 	verification,
 } from "./schema";
 
-const schema = { account, passkey, session, user, verification };
+const schema = {
+	account,
+	notification,
+	passkey,
+	property,
+	pushSubscription,
+	savedProperty,
+	session,
+	user,
+	verification,
+};
 
 export const relations = {
 	...defineRelations(schema),
@@ -21,4 +37,6 @@ export const relations = {
 			}),
 		},
 	})),
+	...propertyRelations,
+	...notificationRelations,
 };
