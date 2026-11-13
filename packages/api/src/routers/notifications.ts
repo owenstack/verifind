@@ -1,15 +1,17 @@
 import { ORPCError } from "@orpc/server";
 import {
-	notification,
-	pushSubscription,
-} from "@verifind/db/schema/notification";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+	createSubscription,
+	deleteSubscription,
+	getNotifications,
+	getUnreadCount,
+	markNotificationRead,
+} from "@verifind/db/queries/notification";
 import z from "zod";
 import { protectedProcedure, publicProcedure } from "../index";
 import { notifyAndPush } from "../lib/notifications";
 
 const subscriptionInputSchema = z.object({
-	endpoint: z.string().url().max(2048),
+	endpoint: z.url().max(2048),
 	keys: z.object({
 		p256dh: z.string().min(1).max(255),
 		auth: z.string().min(1).max(255),
@@ -29,73 +31,26 @@ export const notificationsRouter = {
 				.optional()
 		)
 		.handler(async ({ context, input }) => {
-			const limit = input?.limit ?? 20;
-			const unreadOnly = input?.unreadOnly ?? false;
-			const filters = [eq(notification.userId, context.session.user.id)];
-			if (unreadOnly) {
-				filters.push(isNull(notification.readAt));
-			}
-			const [items, totals] = await Promise.all([
-				context.db
-					.select()
-					.from(notification)
-					.where(and(...filters))
-					.orderBy(desc(notification.createdAt))
-					.limit(limit),
-				context.db
-					.select({ total: sql<number>`count(*)` })
-					.from(notification)
-					.where(
-						and(
-							eq(notification.userId, context.session.user.id),
-							isNull(notification.readAt)
-						)
-					),
-			]);
-			return {
-				items,
-				unreadCount: Number(totals[0]?.total ?? 0),
-			};
+			const userId = context.session.user.id;
+			return await getNotifications(context.db, { ...input, userId });
 		}),
 
 	unreadCount: protectedProcedure.handler(async ({ context }) => {
-		const [row] = await context.db
-			.select({ total: sql<number>`count(*)` })
-			.from(notification)
-			.where(
-				and(
-					eq(notification.userId, context.session.user.id),
-					isNull(notification.readAt)
-				)
-			);
-		return { count: Number(row?.total ?? 0) };
+		const userId = context.session.user.id;
+		return await getUnreadCount(context.db, userId);
 	}),
 
 	markRead: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.handler(async ({ context, input }) => {
-			await context.db
-				.update(notification)
-				.set({ readAt: new Date() })
-				.where(
-					and(
-						eq(notification.id, input.id),
-						eq(notification.userId, context.session.user.id)
-					)
-				);
+			const userId = context.session.user.id;
+			await markNotificationRead(context.db, { userId, id: input.id });
 			return { ok: true };
 		}),
 
 	markAllRead: protectedProcedure.handler(async ({ context }) => {
-		await context.db
-			.update(notification)
-			.set({ readAt: new Date() })
-			.where(
-				and(
-					eq(notification.userId, context.session.user.id),
-					isNull(notification.readAt)
-				)
-			);
+		const userId = context.session.user.id;
+		await markNotificationRead(context.db, { userId });
 		return { ok: true };
 	}),
 
@@ -120,18 +75,7 @@ export const notificationsRouter = {
 						: null,
 					userAgent: input.userAgent ?? null,
 				};
-				await context.db
-					.insert(pushSubscription)
-					.values(values)
-					.onConflictDoUpdate({
-						set: {
-							p256dh: values.p256dh,
-							auth: values.auth,
-							expirationTime: values.expirationTime,
-							userId: values.userId,
-						},
-						target: pushSubscription.endpoint,
-					});
+				await createSubscription(context.db, values);
 
 				// Confirm the subscription end-to-end with a real push.
 				const { push } = await notifyAndPush(context, {
@@ -146,16 +90,13 @@ export const notificationsRouter = {
 			}),
 
 		unsubscribe: protectedProcedure
-			.input(z.object({ endpoint: z.string().url().max(2048) }))
+			.input(z.object({ endpoint: z.url().max(2048) }))
 			.handler(async ({ context, input }) => {
-				await context.db
-					.delete(pushSubscription)
-					.where(
-						and(
-							eq(pushSubscription.userId, context.session.user.id),
-							eq(pushSubscription.endpoint, input.endpoint)
-						)
-					);
+				const userId = context.session.user.id;
+				await deleteSubscription(context.db, {
+					userId,
+					endpoint: input.endpoint,
+				});
 				return { ok: true };
 			}),
 

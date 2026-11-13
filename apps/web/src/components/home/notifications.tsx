@@ -1,4 +1,3 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: handlers bind to local callbacks for drawer interactions
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AppRouterClient } from "@verifind/api/routers/index";
 import { AvatarBadge } from "@verifind/ui/components/avatar";
@@ -26,6 +25,7 @@ import {
 	BellOff,
 	House,
 	Info,
+	type LucideIcon,
 	ShieldCheck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -42,163 +42,122 @@ type NotificationItem = Awaited<
 	ReturnType<AppRouterClient["notifications"]["list"]>
 >["items"][number];
 
-const typeIcons: Record<string, typeof Bell> = {
-	property: House,
-	security: ShieldCheck,
-	support: ArrowUpRight,
-	system: Info,
-};
+// const typeIcons: Record<string, LucideIcon> = {
+// 	property: House,
+// 	security: ShieldCheck,
+// 	support: ArrowUpRight,
+// 	system: Info,
+// };
 
-function iconForType(type: string): typeof Bell {
-	return typeIcons[type] ?? Bell;
-}
+// function listState(query: NotificationListQuery): NotificationListState {
+// 	if (query.isPending) {
+// 		return { status: "loading" };
+// 	}
+// 	if (query.isError) {
+// 		return { status: "error" };
+// 	}
+// 	return {
+// 		groups: groupNotificationsByDay(query.data.items),
+// 		status: "ready",
+// 		unreadCount: query.data.unreadCount,
+// 	};
+// }
 
-function dayLabel(value: Date): string {
-	const date = new Date(value);
-	const today = new Date();
-	const yesterday = new Date();
-	yesterday.setDate(today.getDate() - 1);
-	const sameDay = (a: Date, b: Date) =>
-		a.getFullYear() === b.getFullYear() &&
-		a.getMonth() === b.getMonth() &&
-		a.getDate() === b.getDate();
-	if (sameDay(date, today)) {
-		return "Today";
-	}
-	if (sameDay(date, yesterday)) {
-		return "Yesterday";
-	}
-	return date.toLocaleDateString("en-NG", {
-		day: "numeric",
-		month: "short",
-		year: date.getFullYear() === today.getFullYear() ? undefined : "numeric",
-	});
-}
+// interface NotificationListState {
+// 	groups?: NotificationGroup[];
+// 	status: "error" | "loading" | "ready";
+// 	unreadCount?: number;
+// }
 
-function timeLabel(value: Date): string {
-	return new Date(value).toLocaleTimeString("en-NG", {
-		hour: "numeric",
-		minute: "2-digit",
-	});
-}
+// interface NotificationListBodyProps {
+// 	onItemClick: (item: NotificationItem) => void;
+// 	state: NotificationListState;
+// }
 
-function useNotificationList() {
-	return useQuery(
-		orpc.notifications.list.queryOptions({ input: { limit: 30 } })
-	);
-}
+// function NotificationListBody({
+// 	onItemClick,
+// 	state,
+// }: NotificationListBodyProps) {
+// 	if (state.status === "loading") {
+// 		return (
+// 			<p className="text-muted-foreground text-sm">Loading notifications…</p>
+// 		);
+// 	}
+// 	if (state.status === "error") {
+// 		return (
+// 			<p className="text-muted-foreground text-sm">
+// 				Could not load notifications. Please try again.
+// 			</p>
+// 		);
+// 	}
+// 	if (!state.groups || state.groups.length === 0) {
+// 		return (
+// 			<p className="text-muted-foreground text-sm">
+// 				You are all caught up. Notifications about verified homes and your saved
+// 				searches will appear here.
+// 			</p>
+// 		);
+// 	}
+// 	return (
+// 		<>
+// 			{state.groups.map((group) => (
+// 				<section
+// 					aria-label={group.date}
+// 					className="grid gap-3"
+// 					key={group.date}
+// 				>
+// 					<h3 className="font-medium text-muted-foreground">{group.date}</h3>
+// 					<div className="grid gap-2">
+// 						{group.items.map((item) => (
+// 							<NotificationRow
+// 								item={item}
+// 								key={item.id}
+// 								onItemClick={onItemClick}
+// 							/>
+// 						))}
+// 					</div>
+// 				</section>
+// 			))}
+// 		</>
+// 	);
+// }
 
-type NotificationListQuery = ReturnType<typeof useNotificationList>;
-
-function listState(query: NotificationListQuery): NotificationListState {
-	if (query.isPending) {
-		return { status: "loading" };
-	}
-	if (query.isError) {
-		return { status: "error" };
-	}
-	return {
-		groups: groupNotificationsByDay(query.data.items),
-		status: "ready",
-		unreadCount: query.data.unreadCount,
-	};
-}
-
-interface NotificationListState {
-	groups?: NotificationGroup[];
-	status: "error" | "loading" | "ready";
-	unreadCount?: number;
-}
-
-interface NotificationListBodyProps {
-	onItemClick: (item: NotificationItem) => void;
-	state: NotificationListState;
-}
-
-function NotificationListBody({
-	onItemClick,
-	state,
-}: NotificationListBodyProps) {
-	if (state.status === "loading") {
-		return (
-			<p className="text-muted-foreground text-sm">Loading notifications…</p>
-		);
-	}
-	if (state.status === "error") {
-		return (
-			<p className="text-muted-foreground text-sm">
-				Could not load notifications. Please try again.
-			</p>
-		);
-	}
-	if (!state.groups || state.groups.length === 0) {
-		return (
-			<p className="text-muted-foreground text-sm">
-				You are all caught up. Notifications about verified homes and your saved
-				searches will appear here.
-			</p>
-		);
-	}
-	return (
-		<>
-			{state.groups.map((group) => (
-				<section
-					aria-label={group.date}
-					className="grid gap-3"
-					key={group.date}
-				>
-					<h3 className="font-medium text-muted-foreground">{group.date}</h3>
-					<div className="grid gap-2">
-						{group.items.map((item) => (
-							<NotificationRow
-								item={item}
-								key={item.id}
-								onItemClick={onItemClick}
-							/>
-						))}
-					</div>
-				</section>
-			))}
-		</>
-	);
-}
-
-function NotificationRow({
-	item,
-	onItemClick,
-}: {
-	item: NotificationItem;
-	onItemClick: (item: NotificationItem) => void;
-}) {
-	const Icon = iconForType(item.type);
-	const unread = !item.readAt;
-	return (
-		<Item
-			className={cn("items-start gap-2 p-2", unread && "bg-primary/5")}
-			key={item.id}
-			render={<button onClick={() => onItemClick(item)} type="button" />}
-		>
-			<ItemMedia variant="icon">
-				<Icon aria-hidden="true" />
-			</ItemMedia>
-			<ItemContent>
-				<ItemHeader>
-					<ItemTitle>{item.title}</ItemTitle>
-					<span className="shrink-0 text-muted-foreground text-xs">
-						{timeLabel(item.createdAt)}
-					</span>
-				</ItemHeader>
-				<ItemDescription>{item.body}</ItemDescription>
-			</ItemContent>
-			{unread ? (
-				<span
-					aria-hidden="true"
-					className="mt-2 size-2 shrink-0 rounded-full bg-primary"
-				/>
-			) : null}
-		</Item>
-	);
-}
+// function NotificationRow({
+// 	item,
+// 	onItemClick,
+// }: {
+// 	item: NotificationItem;
+// 	onItemClick: (item: NotificationItem) => void;
+// }) {
+// 	const Icon = iconForType(item.type);
+// 	const unread = !item.readAt;
+// 	return (
+// 		<Item
+// 			className={cn("items-start gap-2 p-2", unread && "bg-primary/5")}
+// 			key={item.id}
+// 			render={<button onClick={() => onItemClick(item)} type="button" />}
+// 		>
+// 			<ItemMedia variant="icon">
+// 				<Icon aria-hidden="true" />
+// 			</ItemMedia>
+// 			<ItemContent>
+// 				<ItemHeader>
+// 					<ItemTitle>{item.title}</ItemTitle>
+// 					<span className="shrink-0 text-muted-foreground text-xs">
+// 						{timeLabel(item.createdAt)}
+// 					</span>
+// 				</ItemHeader>
+// 				<ItemDescription>{item.body}</ItemDescription>
+// 			</ItemContent>
+// 			{unread ? (
+// 				<span
+// 					aria-hidden="true"
+// 					className="mt-2 size-2 shrink-0 rounded-full bg-primary"
+// 				/>
+// 			) : null}
+// 		</Item>
+// 	);
+// }
 
 function describePushFailure(
 	reason:
@@ -221,96 +180,96 @@ function describePushFailure(
 	}
 }
 
-interface NotificationGroup {
-	date: string;
-	items: NotificationItem[];
-}
+// interface NotificationGroup {
+// 	date: string;
+// 	items: NotificationItem[];
+// }
 
 /** Group notifications into consecutive day buckets (Today, Yesterday, …). */
-function groupNotificationsByDay(
-	items: NotificationItem[]
-): NotificationGroup[] {
-	const groups: NotificationGroup[] = [];
-	for (const item of items) {
-		const label = dayLabel(item.createdAt);
-		const last = groups.at(-1);
-		if (last && last.date === label) {
-			last.items.push(item);
-		} else {
-			groups.push({ date: label, items: [item] });
-		}
-	}
-	return groups;
-}
+// function groupNotificationsByDay(
+// 	items: NotificationItem[]
+// ): NotificationGroup[] {
+// 	const groups: NotificationGroup[] = [];
+// 	for (const item of items) {
+// 		const label = dayLabel(item.createdAt);
+// 		const last = groups.at(-1);
+// 		if (last && last.date === label) {
+// 			last.items.push(item);
+// 		} else {
+// 			groups.push({ date: label, items: [item] });
+// 		}
+// 	} 
+// 	return groups;
+// }
 
-function pushToggleIcon(busy: boolean, enabled: boolean | null) {
-	if (busy) {
-		return Spinner;
-	}
-	return enabled ? Bell : BellOff;
-}
+// function pushToggleIcon(busy: boolean, enabled: boolean | null) {
+// 	if (busy) {
+// 		return Spinner;
+// 	}
+// 	return enabled ? Bell : BellOff;
+// }
 
-async function togglePushOff(
-	setEnabled: (value: boolean | null) => void
-): Promise<void> {
-	const result = await disablePushNotifications();
-	setEnabled(result.ok ? false : null);
-	toast.add({
-		title: result.ok
-			? "Push notifications turned off"
-			: "Could not turn off push notifications",
-		type: result.ok ? "success" : "error",
-	});
-}
+// async function togglePushOff(
+// 	setEnabled: (value: boolean | null) => void
+// ): Promise<void> {
+// 	const result = await disablePushNotifications();
+// 	setEnabled(result.ok ? false : null);
+// 	toast.add({
+// 		title: result.ok
+// 			? "Push notifications turned off"
+// 			: "Could not turn off push notifications",
+// 		type: result.ok ? "success" : "error",
+// 	});
+// }
 
-async function togglePushOn(
-	setEnabled: (value: boolean | null) => void
-): Promise<void> {
-	const result = await enablePushNotifications();
-	setEnabled(result.ok ? true : null);
-	toast.add({
-		description: result.ok ? undefined : describePushFailure(result.reason),
-		title: result.ok ? "Push notifications enabled" : "Push not enabled",
-		type: result.ok ? "success" : "error",
-	});
-}
+// async function togglePushOn(
+// 	setEnabled: (value: boolean | null) => void
+// ): Promise<void> {
+// 	const result = await enablePushNotifications();
+// 	setEnabled(result.ok ? true : null);
+// 	toast.add({
+// 		description: result.ok ? undefined : describePushFailure(result.reason),
+// 		title: result.ok ? "Push notifications enabled" : "Push not enabled",
+// 		type: result.ok ? "success" : "error",
+// 	});
+// }
 
-function PushToggle() {
-	const [enabled, setEnabled] = useState<boolean | null>(null);
-	const [busy, setBusy] = useState(false);
+// function PushToggle() {
+// 	const [enabled, setEnabled] = useState<boolean | null>(null);
+// 	const [busy, setBusy] = useState(false);
 
-	useEffect(() => {
-		getPushSubscriptionState().then(setEnabled);
-	}, []);
+// 	useEffect(() => {
+// 		getPushSubscriptionState().then(setEnabled);
+// 	}, []);
 
-	const toggle = async () => {
-		setBusy(true);
-		try {
-			if (enabled) {
-				await togglePushOff(setEnabled);
-			} else {
-				await togglePushOn(setEnabled);
-			}
-		} finally {
-			setBusy(false);
-		}
-	};
+// 	const toggle = async () => {
+// 		setBusy(true);
+// 		try {
+// 			if (enabled) {
+// 				await togglePushOff(setEnabled);
+// 			} else {
+// 				await togglePushOn(setEnabled);
+// 			}
+// 		} finally {
+// 			setBusy(false);
+// 		}
+// 	};
 
-	const Icon = pushToggleIcon(busy, enabled);
-	return (
-		<Button
-			aria-pressed={enabled === true}
-			className={cn("text-secondary", enabled && "text-primary")}
-			disabled={enabled === null || busy}
-			onClick={toggle}
-			size="sm"
-			variant="ghost"
-		>
-			<Icon aria-hidden="true" />
-			{enabled ? "Push on" : "Enable push"}
-		</Button>
-	);
-}
+// 	const Icon = pushToggleIcon(busy, enabled);
+// 	return (
+// 		<Button
+// 			aria-pressed={enabled === true}
+// 			className={cn("text-secondary", enabled && "text-primary")}
+// 			disabled={enabled === null || busy}
+// 			onClick={toggle}
+// 			size="sm"
+// 			variant="ghost"
+// 		>
+// 			<Icon aria-hidden="true" />
+// 			{enabled ? "Push on" : "Enable push"}
+// 		</Button>
+// 	);
+// }
 
 export function Notifications() {
 	const queryClient = useQueryClient();

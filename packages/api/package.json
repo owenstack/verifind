@@ -16,7 +16,6 @@
     "@orpc/zod": "catalog:",
     "@verifind/auth": "workspace:*",
     "@verifind/db": "workspace:*",
-    "drizzle-orm": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -1,8 +1,8 @@
 import {
-	notification,
-	pushSubscription,
-} from "@verifind/db/schema/notification";
-import { and, eq } from "drizzle-orm";
+	createNotification,
+	deleteSubscription,
+	getSubscriptions,
+} from "@verifind/db/queries/notification";
 import type { Context } from "../context";
 import { type PushPayload, sendPushNotification } from "./web-push";
 
@@ -13,29 +13,6 @@ export interface CreateNotificationInput {
 	type?: string;
 	url?: string;
 	userId: string;
-}
-
-/** Persist an in-app notification row. */
-export async function createNotification(
-	ctx: Pick<Context, "db">,
-	input: CreateNotificationInput
-) {
-	const [row] = await ctx.db
-		.insert(notification)
-		.values({
-			id: crypto.randomUUID(),
-			userId: input.userId,
-			type: input.type ?? "system",
-			title: input.title,
-			body: input.body ?? "",
-			url: input.url,
-			data: input.data,
-		})
-		.returning();
-	if (!row) {
-		throw new Error("Failed to create notification");
-	}
-	return row;
 }
 
 /**
@@ -53,10 +30,7 @@ export async function pushToUser(
 	if (!vapid) {
 		return { delivered: 0, pruned: 0 };
 	}
-	const subscriptions = await ctx.db
-		.select()
-		.from(pushSubscription)
-		.where(eq(pushSubscription.userId, userId));
+	const subscriptions = await getSubscriptions(ctx.db, { userId });
 
 	const delivered = 0;
 	const pruned = await Promise.all(
@@ -81,14 +55,10 @@ export async function pushToUser(
 				return null;
 			}
 			// The push service reported the subscription as gone (404/410).
-			await ctx.db
-				.delete(pushSubscription)
-				.where(
-					and(
-						eq(pushSubscription.userId, userId),
-						eq(pushSubscription.endpoint, subscription.endpoint)
-					)
-				);
+			await deleteSubscription(ctx.db, {
+				userId,
+				endpoint: subscription.endpoint,
+			});
 			return subscription.endpoint;
 		})
 	);
@@ -100,7 +70,7 @@ export async function notifyAndPush(
 	ctx: Pick<Context, "db" | "config">,
 	input: CreateNotificationInput & { payload?: Partial<PushPayload> }
 ) {
-	const row = await createNotification(ctx, input);
+	const row = await createNotification(ctx.db, input);
 	const result = await pushToUser(ctx, input.userId, {
 		body: row.body,
 		title: row.title,
