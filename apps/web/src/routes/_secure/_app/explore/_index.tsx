@@ -1,93 +1,42 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
-import { useQuery } from "@tanstack/react-query";
+
 import { createFileRoute } from "@tanstack/react-router";
-import type { AppRouterClient } from "@verifind/api/routers/index";
-import { Button } from "@verifind/ui/components/button";
-import {
-	Empty,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyMedia,
-	EmptyTitle,
-} from "@verifind/ui/components/empty";
-import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from "@verifind/ui/components/input-group";
-import { Mic, Search, SearchX, SlidersHorizontal } from "lucide-react";
-import { useState } from "react";
+import { TitleQuery } from "@/components/others/title-input";
 
-import {
-	ListingResults,
-	PropertyCard,
-	PropertyGrid,
-	toListingResultsState,
-} from "@/components/property/property-card";
-import { formatNaira } from "@/lib/format";
-import { cn } from "@/lib/utils";
-import { orpc } from "@/utils/orpc";
-
-export const Route = createFileRoute("/_secure/_app/search")({
+export const Route = createFileRoute("/_secure/_app/explore/_index")({
 	component: RouteComponent,
 });
 
-type ListPropertyType =
-	| "apartment"
-	| "bungalow"
-	| "duplex"
-	| "self_contained"
-	| "shared_apartment"
-	| "studio";
-
-interface SearchFilters {
-	bedrooms?: number;
-	maxPrice?: number;
-	minPrice?: number;
-	propertyType?: string;
-	verifiedOnly: boolean;
-}
-
-const propertyTypes = [
-	{ label: "Apartment", value: "apartment" },
-	{ label: "Duplex", value: "duplex" },
-	{ label: "Bungalow", value: "bungalow" },
-	{ label: "Self Contained", value: "self_contained" },
-	{ label: "Shared Apartment", value: "shared_apartment" },
-	{ label: "Studio", value: "studio" },
-];
-
 function RouteComponent() {
-	const [query, setQuery] = useState("");
-	const [filters, setFilters] = useState<SearchFilters>({
-		verifiedOnly: false,
-	});
-	const [filtersOpen, setFiltersOpen] = useState(false);
+	// const [query, setQuery] = useState("");
+	// const [filters, setFilters] = useState<SearchFilters>({
+	// 	verifiedOnly: false,
+	// });
+	// const [filtersOpen, setFiltersOpen] = useState(false);
 
-	const listQuery = useQuery(
-		orpc.properties.list.queryOptions({
-			input: {
-				bedrooms: filters.bedrooms,
-				limit: 24,
-				maxPrice: filters.maxPrice,
-				minPrice: filters.minPrice,
-				propertyType: filters.propertyType as ListPropertyType | undefined,
-				q: query.trim() || undefined,
-				verifiedOnly: filters.verifiedOnly,
-			},
-		})
-	);
+	// const listQuery = useQuery(
+	// 	orpc.tenant.properties.list.queryOptions({
+	// 		input: {
+	// 			bedrooms: filters.bedrooms,
+	// 			limit: 24,
+	// 			maxPrice: filters.maxPrice,
+	// 			minPrice: filters.minPrice,
+	// 			propertyType: filters.propertyType as ListPropertyType | undefined,
+	// 			q: query.trim() || undefined,
+	// 			verifiedOnly: filters.verifiedOnly,
+	// 		},
+	// 	})
+	// );
 
-	const activeFilterCount = [
-		filters.bedrooms !== undefined,
-		filters.maxPrice !== undefined,
-		filters.minPrice !== undefined,
-		filters.propertyType !== undefined,
-		filters.verifiedOnly,
-	].filter(Boolean).length;
+	// const activeFilterCount = [
+	// 	filters.bedrooms !== undefined,
+	// 	filters.maxPrice !== undefined,
+	// 	filters.minPrice !== undefined,
+	// 	filters.propertyType !== undefined,
+	// 	filters.verifiedOnly,
+	// ].filter(Boolean).length;
 
-	const resultsBody = computeResultsBody(listQuery);
+	// const resultsBody = computeResultsBody(listQuery);
 
 	return (
 		<main className="mx-auto grid w-full max-w-3xl gap-4 px-4 pt-2 pb-24">
@@ -97,7 +46,8 @@ function RouteComponent() {
 					Search by area or apartment type across verified listings.
 				</p>
 			</div>
-			<div className="flex items-center gap-2">
+			<TitleQuery />
+			{/* <div className="flex items-center gap-2">
 				<InputGroup>
 					<InputGroupAddon>
 						<Search />
@@ -130,9 +80,9 @@ function RouteComponent() {
 				>
 					<Mic />
 				</Button>
-			</div>
+			</div> */}
 
-			{filtersOpen ? (
+			{/* {filtersOpen ? (
 				<section
 					aria-label="Search filters"
 					className="grid gap-4 rounded-2xl border bg-card p-4 shadow-xs"
@@ -242,7 +192,7 @@ function RouteComponent() {
 					<label className="flex items-center gap-2 font-medium text-sm">
 						<input
 							checked={filters.verifiedOnly}
-							className="size-4 accent-[var(--primary)]"
+							className="size-4 accent-primary"
 							onChange={(event) =>
 								setFilters((current) => ({
 									...current,
@@ -266,59 +216,49 @@ function RouteComponent() {
 				</section>
 			) : null}
 
-			{resultsBody}
+			{resultsBody} */}
 		</main>
 	);
 }
 
-type PropertyListResult = Awaited<
-	ReturnType<AppRouterClient["properties"]["list"]>
->;
-
-interface ListQueryLike {
-	data?: PropertyListResult;
-	isError: boolean;
-	isPending: boolean;
-}
-
-function computeResultsBody(query: ListQueryLike): React.ReactNode {
-	if (query.isPending || query.isError || !query.data) {
-		return (
-			<ListingResults
-				className="sm:grid-cols-2"
-				state={toListingResultsState(query, {
-					empty: "",
-					error: "Could not load listings. Please try again.",
-				})}
-			/>
-		);
-	}
-	if (query.data.items.length === 0) {
-		return (
-			<Empty className="rounded-2xl border">
-				<EmptyHeader>
-					<EmptyMedia variant="icon">
-						<SearchX aria-hidden="true" />
-					</EmptyMedia>
-					<EmptyTitle>No homes found</EmptyTitle>
-					<EmptyDescription>
-						Try a different area, type or budget — or clear your filters to see
-						everything.
-					</EmptyDescription>
-				</EmptyHeader>
-			</Empty>
-		);
-	}
-	return (
-		<>
-			<p aria-live="polite" className="text-muted-foreground text-xs">
-				{query.data.total} {query.data.total === 1 ? "home" : "homes"} found
-			</p>
-			<PropertyGrid className="sm:grid-cols-2">
-				{query.data.items.map((item) => (
-					<PropertyCard key={item.id} property={item} />
-				))}
-			</PropertyGrid>
-		</>
-	);
-}
+// function computeResultsBody(query: ListQueryLike): React.ReactNode {
+// 	if (query.isPending || query.isError || !query.data) {
+// 		return (
+// 			<ListingResults
+// 				className="sm:grid-cols-2"
+// 				state={toListingResultsState(query, {
+// 					empty: "",
+// 					error: "Could not load listings. Please try again.",
+// 				})}
+// 			/>
+// 		);
+// 	}
+// 	if (query.data.items.length === 0) {
+// 		return (
+// 			<Empty className="rounded-2xl border">
+// 				<EmptyHeader>
+// 					<EmptyMedia variant="icon">
+// 						<SearchX aria-hidden="true" />
+// 					</EmptyMedia>
+// 					<EmptyTitle>No homes found</EmptyTitle>
+// 					<EmptyDescription>
+// 						Try a different area, type or budget — or clear your filters to see
+// 						everything.
+// 					</EmptyDescription>
+// 				</EmptyHeader>
+// 			</Empty>
+// 		);
+// 	}
+// 	return (
+// 		<>
+// 			<p aria-live="polite" className="text-muted-foreground text-xs">
+// 				{query.data.total} {query.data.total === 1 ? "home" : "homes"} found
+// 			</p>
+// 			<PropertyGrid className="sm:grid-cols-2">
+// 				{query.data.items.map((item) => (
+// 					<PropertyCard key={item.id} property={item} />
+// 				))}
+// 			</PropertyGrid>
+// 		</>
+// 	);
+// }

@@ -1,6 +1,6 @@
 import { useRouterState } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "@/components/others/theme-provider";
 import { useSession } from "@/lib/auth-client";
 
 const MINIMUM_MS = 200;
@@ -33,6 +33,7 @@ export function SplashController() {
 	}, [resolvedTheme]);
 
 	useEffect(() => {
+		// biome-ignore lint/suspicious/noUnnecessaryConditions: ref is mutated inside exit callbacks; static analysis can't see it
 		if (exiting.current) {
 			return;
 		}

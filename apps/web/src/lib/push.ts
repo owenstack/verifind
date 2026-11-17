@@ -98,3 +98,24 @@ export async function getPushSubscriptionState(): Promise<boolean> {
 		return false;
 	}
 }
+
+export function describePushFailure(
+	reason:
+		| "denied"
+		| "register-failed"
+		| "subscribe-failed"
+		| "unconfigured"
+		| "unsupported"
+		| undefined
+): string {
+	switch (reason) {
+		case "denied":
+			return "Notification permission was denied. Enable it in your browser settings.";
+		case "unconfigured":
+			return "Push is not set up on this server yet.";
+		case "unsupported":
+			return "This browser does not support push notifications.";
+		default:
+			return "Could not enable push notifications.";
+	}
+}

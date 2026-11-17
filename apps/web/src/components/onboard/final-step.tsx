@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import { Logo } from "../logo";
+import { Logo } from "../others/logo";
 
 const loadingMessages = [
 	"Checking listings and payment options…",

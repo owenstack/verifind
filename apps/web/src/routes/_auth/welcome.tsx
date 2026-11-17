@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buttonVariants } from "@verifind/ui/components/button";
-import { Logo } from "@/components/logo";
+import { Logo } from "@/components/others/logo";
 import { TransitionLink } from "@/platform/transition-link";
 
 export const Route = createFileRoute("/_auth/welcome")({

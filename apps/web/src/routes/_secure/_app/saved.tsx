@@ -18,7 +18,7 @@ import {
 	PropertyCard,
 	PropertyGrid,
 	toListingResultsState,
-} from "@/components/property/property-card";
+} from "@/components/others/property-card";
 import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 

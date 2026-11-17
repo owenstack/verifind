@@ -16,11 +16,11 @@ export function Logo({
 				src="/logo.png"
 				width={240}
 			/>
-			{wordmark && (
+			{wordmark ? (
 				<h1 className="font-bold text-5xl leading-none tracking-tight sm:text-6xl">
 					VeriFind
 				</h1>
-			)}
+			) : null}
 		</div>
 	);
 }

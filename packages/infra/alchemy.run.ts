@@ -75,11 +75,8 @@ export const server = Cloudflare.Worker("server", {
 		GOOGLE_CLIENT_SECRET: Config.Redacted("GOOGLE_CLIENT_SECRET"),
 		GOOGLE_CLIENT_ID: Config.Redacted("GOOGLE_CLIENT_ID"),
 		RESEND_API_KEY: Config.Redacted("RESEND_API_KEY"),
-		VAPID_PUBLIC_KEY: Config.withDefault(Config.String("VAPID_PUBLIC_KEY"), ""),
-		VAPID_PRIVATE_KEY: Config.withDefault(
-			Config.String("VAPID_PRIVATE_KEY"),
-			""
-		),
+		VAPID_PUBLIC_KEY: Config.Redacted("VAPID_PUBLIC_KEY"),
+		VAPID_PRIVATE_KEY: Config.Redacted("VAPID_PRIVATE_KEY"),
 		VAPID_SUBJECT: Config.withDefault(
 			Config.String("VAPID_SUBJECT"),
 			"mailto:hello@verifind.efobi.dev"

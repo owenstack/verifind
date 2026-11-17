@@ -1,24 +1,3 @@
-const nairaFormatter = new Intl.NumberFormat("en-NG", {
-	currency: "NGN",
-	maximumFractionDigits: 0,
-	style: "currency",
-});
-
-/** Format a Naira amount for display, e.g. 1200000 -> "₦1,200,000". */
-export function formatNaira(amount: number): string {
-	return nairaFormatter.format(amount).replace("NGN", "₦").trim();
-}
-
-/** "₦1,200,000 / year" style price label used across listings. */
-export function formatPriceLabel(price: number, period: string): string {
-	return `${formatNaira(price)} / ${period}`;
-}
-
-/** Render a number followed by a pluralised unit: 2 -> "2 Bathrooms". */
-export function formatCount(count: number, unit: string): string {
-	return `${count} ${unit}${count === 1 ? "" : "s"}`;
-}
-
 /** Amenity keys use snake_case; split for display fallback. */
 const AMENITY_KEY_SEPARATOR = /[_-]+/;
 

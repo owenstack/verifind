@@ -1,3 +1,5 @@
+// biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
+
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@verifind/ui/components/button";
@@ -14,7 +16,7 @@ import {
 import { Input } from "@verifind/ui/components/input";
 import { toast } from "@verifind/ui/components/toast";
 import z from "zod";
-import { GoogleSignIn } from "@/components/google";
+import { GoogleSignIn } from "@/components/others/google";
 import { emailOtp } from "@/lib/auth-client";
 import { TransitionLink } from "@/platform/transition-link";
 
@@ -103,9 +105,9 @@ function RouteComponent() {
 													required
 													type="email"
 												/>
-												{isInvalid && (
+												{isInvalid ? (
 													<FieldError errors={field.state.meta.errors} />
-												)}
+												) : null}
 											</Field>
 										);
 									}}

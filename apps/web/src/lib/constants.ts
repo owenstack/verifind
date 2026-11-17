@@ -71,7 +71,7 @@ export const budgetLimits: Record<PaymentType, BudgetPlan> = {
 
 export const footerLinks: NavLink[] = [
 	{ to: "/", icon: Home, label: "Home" },
-	{ to: "/search", icon: Search, label: "Search" },
+	{ to: "/explore", icon: Search, label: "Explore" },
 	{ to: "/saved", icon: Heart, label: "Saved" },
 	{ to: "/chat", icon: MessageCircle, label: "Messages" },
 	{ to: "/user", icon: User, label: "Profile" },

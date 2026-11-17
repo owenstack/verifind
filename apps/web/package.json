@@ -24,7 +24,6 @@
     "@tanstack/react-query-persist-client": "5.105.0",
     "@tanstack/react-router": "^1.170.44",
     "@verifind/api": "workspace:*",
-    "@verifind/db": "workspace:*",
     "@verifind/ui": "workspace:*",
     "better-auth": "catalog:",
     "idb-keyval": "6.3.0",

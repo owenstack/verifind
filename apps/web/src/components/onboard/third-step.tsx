@@ -1,3 +1,5 @@
+// biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
+
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { Button, buttonVariants } from "@verifind/ui/components/button";
 import {

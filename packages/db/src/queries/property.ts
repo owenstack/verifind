@@ -58,7 +58,17 @@ export async function getProperties(db: Database, input: GetPropertiesInput) {
 	}
 	const [items, totals] = await Promise.all([
 		db
-			.select()
+			.select({
+				id: property.id,
+				images: property.images,
+				propertyType: property.propertyType,
+				title: property.title,
+				city: property.city,
+				state: property.state,
+				price: property.price,
+				pricePeriod: property.pricePeriod,
+				verificationStatus: property.verificationStatus,
+			})
 			.from(property)
 			.where(where)
 			.orderBy(orderBy)
@@ -92,7 +102,20 @@ export async function listSavedProperties(
 	input: { userId: string }
 ) {
 	const items = await db
-		.select({ property, savedAt: savedProperty.createdAt })
+		.select({
+			property: {
+				id: property.id,
+				images: property.images,
+				propertyType: property.propertyType,
+				title: property.title,
+				city: property.city,
+				state: property.state,
+				price: property.price,
+				pricePeriod: property.pricePeriod,
+				verificationStatus: property.verificationStatus,
+			},
+			savedAt: savedProperty.createdAt,
+		})
 		.from(savedProperty)
 		.innerJoin(property, eq(savedProperty.propertyId, property.id))
 		.where(eq(savedProperty.userId, input.userId))

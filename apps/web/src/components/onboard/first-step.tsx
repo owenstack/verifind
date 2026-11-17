@@ -1,3 +1,5 @@
+// biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
+
 import type { AnyFieldApi } from "@tanstack/react-form";
 import { Button, buttonVariants } from "@verifind/ui/components/button";
 import { Checkbox } from "@verifind/ui/components/checkbox";
@@ -66,9 +68,9 @@ export function FirstStep({ form }: { form: any }) {
 														);
 													}}
 												/>
-												{option.icon && (
+												{option.icon ? (
 													<option.icon className="size-8 shrink-0 self-center text-primary" />
-												)}
+												) : null}
 												<FieldContent>
 													<FieldTitle>{option.title}</FieldTitle>
 													<FieldDescription>

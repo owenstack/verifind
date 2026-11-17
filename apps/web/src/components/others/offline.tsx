@@ -1,3 +1,5 @@
+// biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
+
 import { Button, buttonVariants } from "@verifind/ui/components/button";
 import { Info, WifiOff } from "lucide-react";
 import { TransitionLink } from "@/platform/transition-link";

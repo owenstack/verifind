@@ -1,3 +1,4 @@
+// biome-ignore lint/performance/noBarrelFile: intentional re-export for app-wide imports
 export { cn } from "cn";
 
 const COMPACT_THRESHOLDS = [
@@ -28,17 +29,20 @@ export function formatCurrency(amount: number, compact = false): string {
 	return formatter(amount / 100);
 }
 
+const WORD_SPLIT_PATTERN = /\s+/;
+const WORD_CHAR_PATTERN = /[\p{L}\p{N}]/u;
+
 export function getInitials(name: string): string {
 	const words =
 		name
 			.normalize("NFC")
-			.split(/\s+/)
-			.filter((word) => /[\p{L}\p{N}]/u.test(word)) ?? [];
+			.split(WORD_SPLIT_PATTERN)
+			.filter((word) => WORD_CHAR_PATTERN.test(word)) ?? [];
 	if (words.length === 0) {
 		return "?";
 	}
 	const firstLetter = (word: string) => {
-		const match = word.match(/[\p{L}\p{N}]/u);
+		const match = word.match(WORD_CHAR_PATTERN);
 		return match ? match[0] : "";
 	};
 	const first = firstLetter(words[0] ?? "");
@@ -71,4 +75,58 @@ export function slugify(
 	}
 
 	return slug;
+}
+
+export function formatDistanceToNow(date: Date): string {
+	const now = new Date();
+	const diffMs = date.getTime() - now.getTime();
+	const isFuture = diffMs > 0;
+	const abs = Math.abs(diffMs);
+
+	const seconds = Math.floor(abs / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
+	const days = Math.floor(hours / 24);
+	const weeks = Math.floor(days / 7);
+
+	const nowYear = now.getFullYear();
+	const nowMonth = now.getMonth();
+	const dateYear = date.getFullYear();
+	const dateMonth = date.getMonth();
+
+	const yearsDiff = Math.abs(dateYear - nowYear);
+	const monthsDiff = Math.abs(dateMonth - nowMonth + (dateYear - nowYear) * 12);
+
+	const fmt = (value: number, unit: string) =>
+		`${value} ${unit}${value === 1 ? "" : "s"}`;
+
+	const label = (() => {
+		if (seconds <= 5) {
+			return null;
+		}
+		if (yearsDiff > 0) {
+			return fmt(yearsDiff, "year");
+		}
+		if (monthsDiff > 0) {
+			return fmt(monthsDiff, "month");
+		}
+		if (weeks > 0) {
+			return fmt(weeks, "week");
+		}
+		if (days > 0) {
+			return fmt(days, "day");
+		}
+		if (hours > 0) {
+			return fmt(hours, "hour");
+		}
+		if (minutes > 0) {
+			return fmt(minutes, "minute");
+		}
+		return fmt(seconds, "second");
+	})();
+
+	if (!label) {
+		return "just now";
+	}
+	return isFuture ? `in ${label}` : `${label} ago`;
 }

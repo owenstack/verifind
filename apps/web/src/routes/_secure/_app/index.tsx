@@ -1,68 +1,159 @@
-// biome-ignore-all lint/performance/noJsxPropsBind: chips bind inline setters
+// biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
+
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@verifind/ui/components/button";
 import {
-	InputGroup,
-	InputGroupAddon,
-	InputGroupButton,
-	InputGroupInput,
-} from "@verifind/ui/components/input-group";
-import { Mic, Search, Settings2 } from "lucide-react";
-import { useState } from "react";
-
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@verifind/ui/components/empty";
+import { toast } from "@verifind/ui/components/toast";
+import { HousePlus, RefreshCcw } from "lucide-react";
+import type { ReactNode } from "react";
+import { useStore } from "zustand";
 import { AgentInfo } from "@/components/home/agent-info";
 import { LocationFilter } from "@/components/home/location";
 import { Notifications } from "@/components/home/notifications";
+import { QuickFilter } from "@/components/home/quick-filter";
 import {
-	ListingResults,
-	toListingResultsState,
-} from "@/components/property/property-card";
+	PropertyCard,
+	PropertyCardSkeleton,
+} from "@/components/others/property-card";
+import { TitleQuery } from "@/components/others/title-input";
+import {
+	describePushFailure,
+	enablePushNotifications,
+	getPushSubscriptionState,
+} from "@/lib/push";
+import { type Filters, filterStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
+const HAS_PROMPTED_PUSH_KEY = "hasPromptedPush";
+const PROPERTY_LIST_LIMIT = 4;
+const PROPERTY_LIST_STALE_TIME_MS = 30_000;
+const SKELETON_SLOTS = ["skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4"];
+
+// Loader and component must build identical query options so the prefetched
+// data lands in the same cache entry the component reads.
+function propertiesQueryOptions(filter: Filters) {
+	return orpc.tenant.properties.list.queryOptions({
+		input: { ...filter, limit: PROPERTY_LIST_LIMIT },
+		staleTime: PROPERTY_LIST_STALE_TIME_MS,
+	});
+}
+
 export const Route = createFileRoute("/_secure/_app/")({
+	beforeLoad: () => {
+		// Push APIs and localStorage only exist in the browser.
+		if (
+			typeof window === "undefined" ||
+			localStorage.getItem(HAS_PROMPTED_PUSH_KEY)
+		) {
+			return;
+		}
+
+		setTimeout(() => {
+			getPushSubscriptionState().then((subscribed) => {
+				// Don't nag users who already have push enabled, or who denied
+				// notifications — re-prompting them would only show a dead button.
+				const permission =
+					"Notification" in window ? Notification.permission : "denied";
+
+				if (subscribed || permission === "denied") {
+					// They already made a choice; stop checking on future visits.
+					localStorage.setItem(HAS_PROMPTED_PUSH_KEY, "true");
+					return;
+				}
+
+				toast.add({
+					id: "enable-push-notifications",
+					title: "Enable push notifications",
+					description:
+						"Enable push notifications to receive updates on account changes and new verified listings.",
+					type: "info",
+					// The toast never auto-dismisses: it only closes once the user
+					// enables, dismisses, or swipes it away. An unread toast must
+					// not burn the one-shot prompt (see onClose).
+					timeout: 0,
+					onClose: () => {
+						localStorage.setItem(HAS_PROMPTED_PUSH_KEY, "true");
+					},
+					actionProps: {
+						children: "Enable",
+						onClick: () => {
+							toast.close("enable-push-notifications");
+							toast.promise(enablePushNotifications(), {
+								loading: "Enabling push notifications…",
+								success: (res) => {
+									if (!res.ok) {
+										return {
+											title: "Couldn't enable push notifications",
+											description: `Failed to enable push notifications. ${describePushFailure(res.reason)}`,
+											type: "error",
+										};
+									}
+									return {
+										title: "Push notifications enabled successfully!",
+										type: "success",
+									};
+								},
+								error: "Failed to enable push notifications.",
+							});
+						},
+					},
+				});
+			});
+		}, 5000);
+	},
+	loader: async ({ context }) => {
+		// The filter store rehydrates from localStorage synchronously, so this
+		// matches what the component is about to request. Prefill the query
+		// cache so the page renders with data instead of flashing skeletons.
+		const { filter } = filterStore.getState();
+		await context.queryClient.query(propertiesQueryOptions(filter));
+	},
 	component: RouteComponent,
 });
 
-interface QuickFilter {
-	bedrooms?: number;
-	label: string;
-	maxPrice?: number;
-	propertyType?: "apartment" | "duplex";
-	verifiedOnly?: boolean;
-}
-
-const quickFilters: QuickFilter[] = [
-	{ label: "Verified", verifiedOnly: true },
-	{ label: "Apartments", propertyType: "apartment" },
-	{ label: "Duplexes", propertyType: "duplex" },
-	{ label: "2+ Beds", bedrooms: 2 },
-	{ label: "Under ₦2M", maxPrice: 2_000_000 },
-];
-
 function RouteComponent() {
 	const { session } = Route.useRouteContext();
-	const [activeQuickFilter, setActiveQuickFilter] = useState<number | null>(
-		null
+	const filter = useStore(filterStore, (state) => state.filter);
+	const { data, refetch, isRefetching } = useQuery(
+		propertiesQueryOptions(filter)
 	);
-	const active =
-		activeQuickFilter === null ? undefined : quickFilters[activeQuickFilter];
 
-	const listQuery = useQuery(
-		orpc.properties.list.queryOptions({
-			input: {
-				bedrooms: active?.bedrooms,
-				limit: 8,
-				maxPrice: active?.maxPrice,
-				propertyType: active?.propertyType,
-				verifiedOnly: active?.verifiedOnly ?? false,
-			},
-		})
-	);
+	let propertyList: ReactNode;
+	if (data === undefined) {
+		// Still loading — skeletons stay up until the request resolves.
+		propertyList = (
+			<div className="grid grid-cols-2 gap-2">
+				{SKELETON_SLOTS.map((slot) => (
+					<PropertyCardSkeleton key={slot} />
+				))}
+			</div>
+		);
+	} else if (data.items.length === 0) {
+		// Loading finished with an empty result — only now is the empty state real.
+		propertyList = (
+			<PropertyEmpty isRefetching={isRefetching} refetch={refetch} />
+		);
+	} else {
+		propertyList = (
+			<div className="grid grid-cols-2 gap-2">
+				{data.items.map((item) => (
+					<PropertyCard key={item.id} property={item} />
+				))}
+			</div>
+		);
+	}
 
 	return (
-		<main className="grid gap-4 px-4 pt-2 pb-24">
+		<main className="grid gap-4 px-4 py-6 sm:px-6 lg:px-8">
 			<div className="flex items-center justify-between gap-4">
 				<LocationFilter />
 				<Notifications />
@@ -75,78 +166,49 @@ function RouteComponent() {
 					Find a Home That Fits Your Needs
 				</p>
 			</div>
-			<div className="flex items-center gap-2">
-				<InputGroup>
-					<InputGroupAddon>
-						<Search />
-					</InputGroupAddon>
-					<InputGroupInput
-						aria-label="Search homes"
-						placeholder="Search homes…"
-						readOnly
-					/>
-					<InputGroupAddon align={"inline-end"}>
-						<InputGroupButton
-							aria-label="Search filters"
-							className={"text-primary"}
-							render={<Link to="/search" />}
-						>
-							<Settings2 />
-						</InputGroupButton>
-					</InputGroupAddon>
-				</InputGroup>
-				<Button
-					aria-label="Search by voice"
-					className={"text-primary"}
-					variant={"ghost"}
-				>
-					<Mic />
-				</Button>
-			</div>
+			<TitleQuery />
 			<AgentInfo />
-			<div className="flex flex-col gap-3">
-				<div className="flex items-center justify-between gap-2">
-					<h2 className="font-medium text-lg">Quick Filters</h2>
-					<Button
-						className={"text-secondary"}
-						render={<Link to="/search" />}
-						variant={"ghost"}
-					>
-						See All
-					</Button>
-				</div>
-				<div className="flex gap-2 overflow-x-auto pb-1">
-					{quickFilters.map((filter, index) => (
-						<Button
-							aria-pressed={activeQuickFilter === index}
-							className={cn(
-								"shrink-0 rounded-full",
-								activeQuickFilter === index
-									? "bg-primary text-primary-foreground"
-									: "bg-muted text-foreground"
-							)}
-							key={filter.label}
-							onClick={() =>
-								setActiveQuickFilter(activeQuickFilter === index ? null : index)
-							}
-							size="sm"
-							variant="ghost"
-						>
-							{filter.label}
-						</Button>
-					))}
-				</div>
-			</div>
-			<section aria-label="Featured homes" className="grid gap-3">
-				<h2 className="font-medium text-lg">Verified Homes For You</h2>
-				<ListingResults
-					state={toListingResultsState(listQuery, {
-						empty:
-							"No homes match this filter yet. Check back soon — new verified listings are added regularly.",
-						error: "Could not load listings. Please try again.",
-					})}
-				/>
+			<QuickFilter />
+			<section className="grid gap-2">
+				<h2 className="my-4 font-medium text-base">Available near you</h2>
+				{propertyList}
 			</section>
 		</main>
+	);
+}
+
+function PropertyEmpty({
+	refetch,
+	isRefetching,
+}: {
+	refetch: () => void;
+	isRefetching: boolean;
+}) {
+	const clearFilter = useStore(filterStore, (state) => state.clearFilter);
+	return (
+		<Empty>
+			<EmptyHeader>
+				<EmptyMedia variant="icon">
+					<HousePlus />
+				</EmptyMedia>
+				<EmptyTitle>No properties found</EmptyTitle>
+				<EmptyDescription>
+					No properties match your current filters. Try adjusting your filters
+					to see more results.
+				</EmptyDescription>
+			</EmptyHeader>
+			<EmptyContent>
+				<Button onClick={() => refetch()}>
+					<RefreshCcw
+						className={cn(isRefetching && "animate-spin")}
+						data-icon="inline-start"
+					/>{" "}
+					Refresh
+				</Button>
+				<Button onClick={() => clearFilter()} variant="outline">
+					Clear Filters
+				</Button>
+			</EmptyContent>
+		</Empty>
 	);
 }

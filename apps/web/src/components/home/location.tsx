@@ -26,7 +26,7 @@ import {
 } from "@verifind/ui/components/field";
 import { InputGroupAddon } from "@verifind/ui/components/input-group";
 import { Locate, MapPin, Search } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { useState } from "react";
 import z from "zod";
 import { useStore } from "zustand";
 import lgas from "@/assets/lga.json";
@@ -85,10 +85,6 @@ export function LocationFilter() {
 			setOpen(false);
 		},
 	});
-	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-		event.preventDefault();
-		form.handleSubmit();
-	};
 	const selectIsSubmitting = (state: typeof form.state) => state.isSubmitting;
 
 	return (
@@ -104,7 +100,13 @@ export function LocationFilter() {
 				<DrawerHeader className="">
 					<DrawerTitle>Choose an area</DrawerTitle>
 				</DrawerHeader>
-				<form className="mt-4 w-full" onSubmit={handleSubmit}>
+				<form
+					className="mt-4 w-full"
+					onSubmit={(e) => {
+						e.preventDefault();
+						form.handleSubmit();
+					}}
+				>
 					<FieldGroup>
 						<form.Field name="location">
 							{(field) => {

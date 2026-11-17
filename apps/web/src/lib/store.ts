@@ -18,9 +18,11 @@ export const filterSchema = z.object({
 	paymentType: z.enum(["standard", "financing"]).optional(),
 	budget: z.number().optional(),
 	location: z.object({ lat: z.number(), long: z.number() }).optional(),
+	title: z.string().optional(),
+	verified: z.boolean().optional(),
 });
 
-type Filters = z.infer<typeof filterSchema>;
+export type Filters = z.infer<typeof filterSchema>;
 
 interface FilterStore {
 	clearFilter: () => void;
@@ -32,7 +34,8 @@ export const filterStore = createStore<FilterStore>()(
 	persist(
 		(set) => ({
 			filter: {},
-			setFilter: (filter) => set({ filter }),
+			setFilter: (filter) =>
+				set((state) => ({ filter: { ...state.filter, ...filter } })),
 			clearFilter: () => set({ filter: {} }),
 		}),
 		{ name: "filters" }

@@ -1,4 +1,5 @@
 import { createRouter, RouterProvider } from "@tanstack/react-router";
+import { Spinner } from "@verifind/ui/components/spinner";
 import ReactDOM from "react-dom/client";
 import { OfflineQueryProvider } from "./lib/offline-persistence";
 import { routeTree } from "./routeTree.gen";
@@ -9,7 +10,13 @@ const router = createRouter({
 	defaultPreload: "intent",
 	scrollRestoration: true,
 	defaultPendingComponent: () => (
-		<div aria-label="Loading page" role="status" />
+		<div
+			aria-label="Loading page"
+			className="flex h-full flex-col items-center"
+			role="status"
+		>
+			<Spinner />
+		</div>
 	),
 	context: { orpc, queryClient },
 	Wrap({ children }: { children: React.ReactNode }) {

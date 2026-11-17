@@ -14,7 +14,7 @@ import { AppShell } from "@verifind/ui/platform/app-shell";
 import { PageTransition } from "@verifind/ui/platform/page-transition";
 import { RefreshCw } from "lucide-react";
 import { type ReactNode, useCallback, useState } from "react";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/others/theme-provider";
 import { useOfflineStatus } from "@/lib/use-offline-status";
 import { PwaUpdateProvider, usePwaUpdates } from "@/platform/pwa-updates";
 import { SplashController } from "@/platform/splash-controller";
@@ -22,7 +22,7 @@ import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
 import { Toaster } from "@verifind/ui/components/toast";
 import { usePullToRefresh } from "@verifind/ui/hooks/use-pull-to-refresh";
-import { Offline } from "@/components/offline";
+import { Offline } from "@/components/others/offline";
 
 export interface RouterAppContext {
 	orpc: typeof orpc;
