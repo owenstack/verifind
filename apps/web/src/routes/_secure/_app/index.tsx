@@ -24,6 +24,7 @@ import {
 	PropertyCardSkeleton,
 } from "@/components/others/property-card";
 import { TitleQuery } from "@/components/others/title-input";
+import { generateKeys } from "@/lib/constants";
 import {
 	describePushFailure,
 	enablePushNotifications,
@@ -36,7 +37,6 @@ import { orpc } from "@/utils/orpc";
 const HAS_PROMPTED_PUSH_KEY = "hasPromptedPush";
 const PROPERTY_LIST_LIMIT = 4;
 const PROPERTY_LIST_STALE_TIME_MS = 30_000;
-const SKELETON_SLOTS = ["skeleton-1", "skeleton-2", "skeleton-3", "skeleton-4"];
 
 // Loader and component must build identical query options so the prefetched
 // data lands in the same cache entry the component reads.
@@ -132,7 +132,7 @@ function RouteComponent() {
 		// Still loading — skeletons stay up until the request resolves.
 		propertyList = (
 			<div className="grid grid-cols-2 gap-2">
-				{SKELETON_SLOTS.map((slot) => (
+				{generateKeys(4).map((slot) => (
 					<PropertyCardSkeleton key={slot} />
 				))}
 			</div>

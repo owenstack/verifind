@@ -57,6 +57,7 @@
         "@tanstack/react-query-persist-client": "5.105.0",
         "@tanstack/react-router": "^1.170.44",
         "@verifind/api": "workspace:*",
+        "@verifind/shared": "workspace:*",
         "@verifind/ui": "workspace:*",
         "better-auth": "catalog:",
         "idb-keyval": "6.3.0",
@@ -97,6 +98,7 @@
         "@orpc/zod": "catalog:",
         "@verifind/auth": "workspace:*",
         "@verifind/db": "workspace:*",
+        "@verifind/shared": "workspace:*",
         "zod": "catalog:",
       },
       "devDependencies": {
@@ -129,6 +131,7 @@
       "name": "@verifind/db",
       "dependencies": {
         "@libsql/client": "0.18.0",
+        "@verifind/shared": "workspace:*",
         "drizzle-orm": "catalog:",
         "libsql": "0.5.29",
         "zod": "catalog:",
@@ -170,6 +173,16 @@
         "effect": "4.1.4",
         "typescript": "catalog:",
         "varlock": "catalog:",
+      },
+    },
+    "packages/shared": {
+      "name": "@verifind/shared",
+      "dependencies": {
+        "zod": "catalog:",
+      },
+      "devDependencies": {
+        "@verifind/config": "workspace:*",
+        "typescript": "catalog:",
       },
     },
     "packages/ui": {
@@ -1072,6 +1085,8 @@
     "@verifind/email": ["@verifind/email@workspace:packages/email"],
 
     "@verifind/infra": ["@verifind/infra@workspace:packages/infra"],
+
+    "@verifind/shared": ["@verifind/shared@workspace:packages/shared"],
 
     "@verifind/ui": ["@verifind/ui@workspace:packages/ui"],
 

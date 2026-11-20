@@ -34,10 +34,10 @@ import { getLgaLabel, type LGA, nearestLGA } from "@/lib/constants";
 import { filterStore } from "@/lib/store";
 
 export function LocationFilter() {
-	const coords = useStore(filterStore, (state) => state.filter.location);
+	const city = useStore(filterStore, (state) => state.filter.city);
 	const setFilter = useStore(filterStore, (state) => state.setFilter);
-	const currentLga = coords
-		? nearestLGA({ latitude: coords.lat, longitude: coords.long })
+	const currentLga = city
+		? (lgas.find((lga) => lga.name === city) ?? lgas[0])
 		: lgas[0];
 	const address = getLgaLabel(currentLga);
 	const [open, setOpen] = useState(false);
@@ -80,8 +80,14 @@ export function LocationFilter() {
 			}),
 		},
 		onSubmit: ({ value }) => {
+			// The filter contract stores a city name, not coordinates. The picker
+			// still works in lat/long, so translate the chosen area at the boundary.
 			const { location } = value;
-			setFilter({ location });
+			const lga = nearestLGA({
+				latitude: location.lat,
+				longitude: location.long,
+			});
+			setFilter({ city: lga.name });
 			setOpen(false);
 		},
 	});

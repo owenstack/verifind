@@ -30,7 +30,7 @@ export function formatAmenity(key: string): string {
 		.join(" ");
 }
 
-const propertyTypeLabels: Record<string, string> = {
+export const propertyTypeLabels: Record<string, string> = {
 	apartment: "Apartment",
 	bungalow: "Bungalow",
 	duplex: "Duplex",

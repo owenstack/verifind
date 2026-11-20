@@ -80,7 +80,7 @@ export const footerLinks: NavLink[] = [
 export const onboarding: OnboardingForm = {
 	propType: [
 		{
-			value: "single",
+			value: "self_contained",
 			title: "Single Room",
 			description: "A room in a shared home or a self-contained unit",
 			icon: DoorClosed,
@@ -139,3 +139,6 @@ export function nearestLGA({
 }
 
 export const getLgaLabel = (lga: LGA) => `${lga.name}, ${lga.state_name}`;
+
+export const generateKeys = (length: number) =>
+	Array.from({ length }, (_, index) => `skeleton-${index}`);

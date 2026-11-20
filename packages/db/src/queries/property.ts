@@ -1,20 +1,9 @@
+import type { PropertyList } from "@verifind/shared";
 import { and, asc, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
 import type { Database } from "../index";
 import { property, savedProperty } from "../schema";
 
-interface GetPropertiesInput {
-	bedrooms?: number;
-	city?: string;
-	limit?: number;
-	maxPrice?: number;
-	minPrice?: number;
-	offset?: number;
-	propertyType?: string;
-	q?: string;
-	sort?: "newest" | "price_asc" | "price_desc";
-	status?: string;
-	verifiedOnly?: boolean;
-}
+type GetPropertiesInput = PropertyList;
 
 export async function getProperties(db: Database, input: GetPropertiesInput) {
 	const filters = [eq(property.status, input.status ?? "available")];
@@ -33,8 +22,8 @@ export async function getProperties(db: Database, input: GetPropertiesInput) {
 	if (input.city) {
 		filters.push(ilike(property.city, `%${input.city}%`));
 	}
-	if (input.propertyType) {
-		filters.push(eq(property.propertyType, input.propertyType));
+	if (input.propType) {
+		filters.push(eq(property.propertyType, input.propType));
 	}
 	if (input.minPrice !== undefined) {
 		filters.push(gte(property.price, input.minPrice));
@@ -45,7 +34,10 @@ export async function getProperties(db: Database, input: GetPropertiesInput) {
 	if (input.bedrooms !== undefined) {
 		filters.push(gte(property.bedrooms, input.bedrooms));
 	}
-	if (input.verifiedOnly) {
+	if (input.bathrooms !== undefined) {
+		filters.push(gte(property.bathrooms, input.bathrooms));
+	}
+	if (input.verified) {
 		filters.push(eq(property.verificationStatus, "verified"));
 	}
 
@@ -72,8 +64,8 @@ export async function getProperties(db: Database, input: GetPropertiesInput) {
 			.from(property)
 			.where(where)
 			.orderBy(orderBy)
-			.limit(input.limit ?? 20)
-			.offset(input.offset ?? 0),
+			.limit(input.limit)
+			.offset(input.offset),
 		db.select({ total: sql<number>`count(*)` }).from(property).where(where),
 	]);
 

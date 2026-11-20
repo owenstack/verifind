@@ -15,7 +15,7 @@ import { FilterDrawer } from "./filter-drawer";
 export function TitleQuery() {
 	const setFilter = useStore(filterStore, (state) => state.setFilter);
 	const handleChange = useDebounceCallback((value: string) => {
-		setFilter({ title: value });
+		setFilter({ q: value });
 	}, 500);
 
 	return (

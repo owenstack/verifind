@@ -1,4 +1,7 @@
-import z from "zod";
+import {
+	type PropertyFiltersInput,
+	propertyListSchema,
+} from "@verifind/shared";
 import { createStore } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -12,17 +15,10 @@ export const stepStore = createStore<OnboardStepState>((set) => ({
 	setStep: (step) => set({ step }),
 }));
 
-export const filterSchema = z.object({
-	propType: z.array(z.string()).optional(),
-	bedroom: z.enum(["1", "2", "3", "4+"]).optional(),
-	paymentType: z.enum(["standard", "financing"]).optional(),
-	budget: z.number().optional(),
-	location: z.object({ lat: z.number(), long: z.number() }).optional(),
-	title: z.string().optional(),
-	verified: z.boolean().optional(),
-});
-
-export type Filters = z.infer<typeof filterSchema>;
+// The web store uses the same schema the API validates and the DB query types
+// against, so a field can only drift if it is changed in @verifind/shared.
+export const filterSchema = propertyListSchema;
+export type Filters = PropertyFiltersInput;
 
 interface FilterStore {
 	clearFilter: () => void;
@@ -38,6 +34,12 @@ export const filterStore = createStore<FilterStore>()(
 				set((state) => ({ filter: { ...state.filter, ...filter } })),
 			clearFilter: () => set({ filter: {} }),
 		}),
-		{ name: "filters" }
+		{
+			name: "filters",
+			version: 1,
+			// Filters saved by the old UI-shaped schema would fail API validation
+			// (e.g. propType was an array), so discard them on upgrade.
+			migrate: () => ({ filter: {} }),
+		}
 	)
 );

@@ -6,7 +6,7 @@
     "check-types": "tsc --noEmit",
     "deploy": "alchemy deploy",
     "destroy": "alchemy destroy",
-    "dev": "npm_execpath='' NODE_OPTIONS='' node ./node_modules/alchemy/bin/cli.js dev"
+    "dev": "npm_execpath='' NODE_OPTIONS='--no-network-family-autoselection' node ./node_modules/alchemy/bin/cli.js dev"
   },
   "dependencies": {
     "@alchemy.run/axiom": "2.0.0-beta.87",

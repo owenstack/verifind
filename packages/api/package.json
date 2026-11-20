@@ -16,6 +16,7 @@
     "@orpc/zod": "catalog:",
     "@verifind/auth": "workspace:*",
     "@verifind/db": "workspace:*",
+    "@verifind/shared": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {

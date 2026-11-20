@@ -2,6 +2,7 @@
   "extends": "@verifind/config/tsconfig.base.json",
   "files": [],
   "references": [
+    { "path": "./packages/shared" },
     { "path": "./packages/db" },
     { "path": "./packages/auth" },
     { "path": "./packages/api" }

@@ -1,5 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute } from "@tanstack/react-router";
+import { propertyTypeSchema } from "@verifind/shared";
 import { Button } from "@verifind/ui/components/button";
 import { Progress } from "@verifind/ui/components/progress";
 import { ArrowLeft } from "lucide-react";
@@ -10,7 +11,8 @@ import { FinalStep } from "@/components/onboard/final-step";
 import { FirstStep } from "@/components/onboard/first-step";
 import { SecondStep } from "@/components/onboard/second-step";
 import { ThirdStep } from "@/components/onboard/third-step";
-import { filterStore, stepStore } from "@/lib/store";
+import { nearestLGA } from "@/lib/constants";
+import { type Filters, filterStore, stepStore } from "@/lib/store";
 
 export const Route = createFileRoute("/_secure/onboard")({
 	component: RouteComponent,
@@ -31,6 +33,25 @@ const formSchema = z.object({
 	),
 });
 
+/**
+ * Onboarding collects UI-friendly preferences. Translate them into the
+ * canonical filter fields before storing them — paymentType has no backend
+ * equivalent, and "house" is not a property type the API supports.
+ */
+function toPropertyFilters(value: z.infer<typeof formSchema>): Filters {
+	const parsedType = propertyTypeSchema.safeParse(value.propType[0]);
+	const lga = nearestLGA({
+		latitude: value.location.lat,
+		longitude: value.location.long,
+	});
+	return {
+		...(parsedType.success ? { propType: parsedType.data } : {}),
+		bedrooms: value.bedroom === "4+" ? 4 : Number(value.bedroom),
+		maxPrice: value.budget,
+		city: lga.name,
+	};
+}
+
 function RouteComponent() {
 	const { setFilter } = filterStore.getState();
 	const step = useStore(stepStore, (state) => state.step);
@@ -47,7 +68,7 @@ function RouteComponent() {
 			onChange: formSchema,
 		},
 		onSubmit: ({ value }) => {
-			setFilter(value);
+			setFilter(toPropertyFilters(value));
 			setStep(3);
 		},
 	});

@@ -1,42 +1,160 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
 
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { Button } from "@verifind/ui/components/button";
+import {
+	Empty,
+	EmptyContent,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "@verifind/ui/components/empty";
+import { ScrollArea } from "@verifind/ui/components/scroll-area";
+import { Spinner } from "@verifind/ui/components/spinner";
+import { HousePlus, RefreshCcw } from "lucide-react";
+import { type ReactNode, useCallback, useEffect } from "react";
+import { useIntersectionObserver } from "usehooks-ts";
+import { useStore } from "zustand";
+import {
+	PropertyCard,
+	PropertyCardSkeleton,
+} from "@/components/others/property-card";
 import { TitleQuery } from "@/components/others/title-input";
+import { generateKeys } from "@/lib/constants";
+import { type Filters, filterStore } from "@/lib/store";
+import { cn } from "@/lib/utils";
+import { orpc } from "@/utils/orpc";
+
+const PAGE_SIZE = 12;
+
+function propertiesInfiniteQueryOptions(filter: Filters) {
+	return orpc.tenant.properties.list.infiniteOptions({
+		input: (offset: number) => ({ ...filter, limit: PAGE_SIZE, offset }),
+		getNextPageParam: (lastPage) => {
+			const nextOffset = lastPage.offset + lastPage.limit;
+			return nextOffset < lastPage.total ? nextOffset : undefined;
+		},
+		initialPageParam: 0,
+		staleTime: 30_000,
+	});
+}
 
 export const Route = createFileRoute("/_secure/_app/explore/_index")({
 	component: RouteComponent,
+	loader: async ({ context }) => {
+		const { filter } = filterStore.getState();
+		await context.queryClient.infiniteQuery(
+			propertiesInfiniteQueryOptions(filter)
+		);
+	},
 });
 
 function RouteComponent() {
-	// const [query, setQuery] = useState("");
-	// const [filters, setFilters] = useState<SearchFilters>({
-	// 	verifiedOnly: false,
-	// });
-	// const [filtersOpen, setFiltersOpen] = useState(false);
+	const { isIntersecting, ref } = useIntersectionObserver({
+		threshold: 0.5,
+	});
+	const filter = useStore(filterStore, (state) => state.filter);
+	const {
+		data,
+		status,
+		hasNextPage,
+		isFetchingNextPage,
+		isFetchNextPageError,
+		isRefetching,
+		fetchNextPage,
+		refetch,
+	} = useInfiniteQuery(propertiesInfiniteQueryOptions(filter));
 
-	// const listQuery = useQuery(
-	// 	orpc.tenant.properties.list.queryOptions({
-	// 		input: {
-	// 			bedrooms: filters.bedrooms,
-	// 			limit: 24,
-	// 			maxPrice: filters.maxPrice,
-	// 			minPrice: filters.minPrice,
-	// 			propertyType: filters.propertyType as ListPropertyType | undefined,
-	// 			q: query.trim() || undefined,
-	// 			verifiedOnly: filters.verifiedOnly,
-	// 		},
-	// 	})
-	// );
+	const loadMore = useCallback(() => {
+		fetchNextPage().catch(() => {
+			// The query surfaces failures through isFetchNextPageError.
+		});
+	}, [fetchNextPage]);
 
-	// const activeFilterCount = [
-	// 	filters.bedrooms !== undefined,
-	// 	filters.maxPrice !== undefined,
-	// 	filters.minPrice !== undefined,
-	// 	filters.propertyType !== undefined,
-	// 	filters.verifiedOnly,
-	// ].filter(Boolean).length;
+	// A single sentinel sits below the list. Whenever it comes into view and
+	// there is more data to load, request the next page. The error guard stops
+	// a failed next-page request from retrying in a loop while the sentinel
+	// stays visible.
+	useEffect(() => {
+		if (
+			isIntersecting &&
+			hasNextPage &&
+			!isFetchingNextPage &&
+			!isFetchNextPageError
+		) {
+			loadMore();
+		}
+	}, [
+		isIntersecting,
+		hasNextPage,
+		isFetchingNextPage,
+		isFetchNextPageError,
+		loadMore,
+	]);
 
-	// const resultsBody = computeResultsBody(listQuery);
+	let propertyList: ReactNode;
+	if (status === "pending") {
+		propertyList = (
+			<div className="grid grid-cols-2 gap-2">
+				{generateKeys(8).map((slot) => (
+					<PropertyCardSkeleton key={slot} />
+				))}
+			</div>
+		);
+	} else if (!data) {
+		propertyList = (
+			<PropertyEmpty isError isRefetching={isRefetching} refetch={refetch} />
+		);
+	} else if (data.pages[0]?.items.length === 0) {
+		propertyList = (
+			<PropertyEmpty isRefetching={isRefetching} refetch={refetch} />
+		);
+	} else {
+		let loadStatus: ReactNode = null;
+		if (isFetchNextPageError) {
+			loadStatus = (
+				<div className="flex flex-col items-center gap-2 py-4 text-center text-sm">
+					<p className="text-muted-foreground">
+						Couldn't load more properties.
+					</p>
+					<Button onClick={loadMore} size="sm" variant="outline">
+						Try again
+					</Button>
+				</div>
+			);
+		} else if (isFetchingNextPage) {
+			loadStatus = (
+				<div className="flex items-center justify-center gap-2 py-4 text-center text-muted-foreground text-sm">
+					<Spinner />
+					Loading more properties...
+				</div>
+			);
+		} else if (!hasNextPage) {
+			loadStatus = (
+				<div className="py-4 text-center text-muted-foreground text-sm">
+					You've reached the end
+				</div>
+			);
+		}
+
+		propertyList = (
+			<ScrollArea className="h-[calc(100vh-200px)]">
+				<div>
+					{data.pages.map((page) => (
+						<div className="grid grid-cols-2 gap-2" key={page.offset}>
+							{page.items.map((item) => (
+								<PropertyCard key={item.id} property={item} />
+							))}
+						</div>
+					))}
+					<div aria-hidden="true" className="h-4" ref={ref} />
+					{loadStatus}
+				</div>
+			</ScrollArea>
+		);
+	}
 
 	return (
 		<main className="mx-auto grid w-full max-w-3xl gap-4 px-4 pt-2 pb-24">
@@ -47,218 +165,50 @@ function RouteComponent() {
 				</p>
 			</div>
 			<TitleQuery />
-			{/* <div className="flex items-center gap-2">
-				<InputGroup>
-					<InputGroupAddon>
-						<Search />
-					</InputGroupAddon>
-					<InputGroupInput
-						aria-label="Search by area or apartment type"
-						onChange={(event) => setQuery(event.target.value)}
-						placeholder="Search by area or apartment type"
-						value={query}
-					/>
-					<InputGroupAddon align={"inline-end"}>
-						<InputGroupButton
-							aria-label="Search filters"
-							className={"relative text-primary"}
-							onClick={() => setFiltersOpen((open) => !open)}
-						>
-							<SlidersHorizontal />
-							{activeFilterCount > 0 ? (
-								<span className="absolute -top-1 -right-1 grid size-4 place-items-center rounded-full bg-primary text-[10px] text-primary-foreground">
-									{activeFilterCount}
-								</span>
-							) : null}
-						</InputGroupButton>
-					</InputGroupAddon>
-				</InputGroup>
-				<Button
-					aria-label="Search by voice"
-					className={"text-primary"}
-					variant={"ghost"}
-				>
-					<Mic />
-				</Button>
-			</div> */}
-
-			{/* {filtersOpen ? (
-				<section
-					aria-label="Search filters"
-					className="grid gap-4 rounded-2xl border bg-card p-4 shadow-xs"
-				>
-					<div className="grid gap-2">
-						<h3 className="font-medium text-sm">Property type</h3>
-						<div className="flex flex-wrap gap-2">
-							<Button
-								aria-pressed={filters.propertyType === undefined}
-								className={cn(
-									"rounded-full",
-									filters.propertyType === undefined
-										? "bg-primary text-primary-foreground"
-										: "bg-muted text-foreground"
-								)}
-								onClick={() =>
-									setFilters((current) => ({
-										...current,
-										propertyType: undefined,
-									}))
-								}
-								size="sm"
-								variant="ghost"
-							>
-								Any
-							</Button>
-							{propertyTypes.map((type) => (
-								<Button
-									aria-pressed={filters.propertyType === type.value}
-									className={cn(
-										"rounded-full",
-										filters.propertyType === type.value
-											? "bg-primary text-primary-foreground"
-											: "bg-muted text-foreground"
-									)}
-									key={type.value}
-									onClick={() =>
-										setFilters((current) => ({
-											...current,
-											propertyType: type.value,
-										}))
-									}
-									size="sm"
-									variant="ghost"
-								>
-									{type.label}
-								</Button>
-							))}
-						</div>
-					</div>
-					<div className="grid gap-2">
-						<h3 className="font-medium text-sm">Bedrooms</h3>
-						<div className="flex flex-wrap gap-2">
-							{[1, 2, 3, 4].map((count) => (
-								<Button
-									aria-pressed={filters.bedrooms === count}
-									className={cn(
-										"rounded-full",
-										filters.bedrooms === count
-											? "bg-primary text-primary-foreground"
-											: "bg-muted text-foreground"
-									)}
-									key={count}
-									onClick={() =>
-										setFilters((current) => ({
-											...current,
-											bedrooms: current.bedrooms === count ? undefined : count,
-										}))
-									}
-									size="sm"
-									variant="ghost"
-								>
-									{count}
-									{count === 4 ? "+" : ""} Beds
-								</Button>
-							))}
-						</div>
-					</div>
-					<div className="grid gap-2">
-						<h3 className="font-medium text-sm">Max budget</h3>
-						<div className="flex flex-wrap gap-2">
-							{[500_000, 1_000_000, 2_000_000, 5_000_000].map((budget) => (
-								<Button
-									aria-pressed={filters.maxPrice === budget}
-									className={cn(
-										"rounded-full",
-										filters.maxPrice === budget
-											? "bg-primary text-primary-foreground"
-											: "bg-muted text-foreground"
-									)}
-									key={budget}
-									onClick={() =>
-										setFilters((current) => ({
-											...current,
-											maxPrice:
-												current.maxPrice === budget ? undefined : budget,
-										}))
-									}
-									size="sm"
-									variant="ghost"
-								>
-									Under {formatNaira(budget)}
-								</Button>
-							))}
-						</div>
-					</div>
-					<label className="flex items-center gap-2 font-medium text-sm">
-						<input
-							checked={filters.verifiedOnly}
-							className="size-4 accent-primary"
-							onChange={(event) =>
-								setFilters((current) => ({
-									...current,
-									verifiedOnly: event.target.checked,
-								}))
-							}
-							type="checkbox"
-						/>
-						Verified listings only
-					</label>
-					<Button
-						className="justify-self-start"
-						onClick={() => {
-							setFilters({ verifiedOnly: false });
-							setQuery("");
-						}}
-						variant="outline"
-					>
-						Clear all filters
-					</Button>
-				</section>
-			) : null}
-
-			{resultsBody} */}
+			{propertyList}
 		</main>
 	);
 }
 
-// function computeResultsBody(query: ListQueryLike): React.ReactNode {
-// 	if (query.isPending || query.isError || !query.data) {
-// 		return (
-// 			<ListingResults
-// 				className="sm:grid-cols-2"
-// 				state={toListingResultsState(query, {
-// 					empty: "",
-// 					error: "Could not load listings. Please try again.",
-// 				})}
-// 			/>
-// 		);
-// 	}
-// 	if (query.data.items.length === 0) {
-// 		return (
-// 			<Empty className="rounded-2xl border">
-// 				<EmptyHeader>
-// 					<EmptyMedia variant="icon">
-// 						<SearchX aria-hidden="true" />
-// 					</EmptyMedia>
-// 					<EmptyTitle>No homes found</EmptyTitle>
-// 					<EmptyDescription>
-// 						Try a different area, type or budget — or clear your filters to see
-// 						everything.
-// 					</EmptyDescription>
-// 				</EmptyHeader>
-// 			</Empty>
-// 		);
-// 	}
-// 	return (
-// 		<>
-// 			<p aria-live="polite" className="text-muted-foreground text-xs">
-// 				{query.data.total} {query.data.total === 1 ? "home" : "homes"} found
-// 			</p>
-// 			<PropertyGrid className="sm:grid-cols-2">
-// 				{query.data.items.map((item) => (
-// 					<PropertyCard key={item.id} property={item} />
-// 				))}
-// 			</PropertyGrid>
-// 		</>
-// 	);
-// }
+function PropertyEmpty({
+	refetch,
+	isRefetching,
+	isError = false,
+}: {
+	refetch: () => void;
+	isRefetching: boolean;
+	isError?: boolean;
+}) {
+	const clearFilter = useStore(filterStore, (state) => state.clearFilter);
+	return (
+		<Empty>
+			<EmptyHeader>
+				<EmptyMedia variant="icon">
+					<HousePlus />
+				</EmptyMedia>
+				<EmptyTitle>
+					{isError ? "Couldn't load properties" : "No properties found"}
+				</EmptyTitle>
+				<EmptyDescription>
+					{isError
+						? "Something went wrong while loading properties. Please try again."
+						: "No properties match your current filters. Try adjusting your filters to see more results."}
+				</EmptyDescription>
+			</EmptyHeader>
+			<EmptyContent>
+				<Button onClick={() => refetch()}>
+					<RefreshCcw
+						className={cn(isRefetching && "animate-spin")}
+						data-icon="inline-start"
+					/>{" "}
+					Refresh
+				</Button>
+				{!isError && (
+					<Button onClick={() => clearFilter()} variant="outline">
+						Clear Filters
+					</Button>
+				)}
+			</EmptyContent>
+		</Empty>
+	);
+}

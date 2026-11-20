@@ -1,6 +1,7 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
 
 import { useForm } from "@tanstack/react-form";
+import { propertyTypeSchema } from "@verifind/shared";
 import { Button } from "@verifind/ui/components/button";
 import {
 	Drawer,
@@ -27,6 +28,7 @@ import {
 import { SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
 import { useStore } from "zustand";
+import { formatPropertyType } from "@/lib/format";
 import { filterSchema, filterStore } from "@/lib/store";
 
 export function FilterDrawer() {
@@ -34,6 +36,9 @@ export function FilterDrawer() {
 	const clearFilter = useStore(filterStore, (state) => state.clearFilter);
 	const setFilter = useStore(filterStore, (state) => state.setFilter);
 	const filter = useStore(filterStore, (state) => state.filter);
+	const count = Object.values(filter).filter(
+		(value) => value !== undefined
+	).length;
 	const form = useForm({
 		defaultValues: filter,
 		validators: {
@@ -69,7 +74,8 @@ export function FilterDrawer() {
 					}}
 				>
 					<FieldGroup>
-						<form.Field name="title">
+						<FieldTitle>{count} active filter(s)</FieldTitle>
+						<form.Field name="q">
 							{(field) => {
 								const isInvalid =
 									field.state.meta.isTouched && !field.state.meta.isValid;
@@ -93,37 +99,96 @@ export function FilterDrawer() {
 								);
 							}}
 						</form.Field>
-						<FieldGroup className="grid grid-cols-2 gap-2">
-							<form.Field name="bedroom">
+						<FieldGroup>
+							<form.Field name="bedrooms">
 								{(field) => {
 									const isInvalid =
 										field.state.meta.isTouched && !field.state.meta.isValid;
 									return (
 										<Field data-invalid={isInvalid}>
-											<FieldLabel htmlFor={field.name}>Bedrooms</FieldLabel>
+											<FieldLabel htmlFor={field.name}>
+												Bedrooms (minimum)
+											</FieldLabel>
 											<FieldContent>
 												<RadioGroup
-													className="flex items-center gap-2"
+													className="grid grid-cols-4 gap-2"
 													id={field.name}
 													name={field.name}
-													onValueChange={field.handleChange}
-													value={field.state.value}
+													onValueChange={(value) =>
+														field.handleChange(Number(value))
+													}
+													value={
+														field.state.value === undefined
+															? undefined
+															: String(field.state.value)
+													}
 												>
-													{["1", "2", "3", "4+"].map((option) => (
+													{[1, 2, 3, 4].map((option) => (
 														<FieldLabel
 															htmlFor={`${field.name}-${option}`}
 															key={option}
 														>
 															<Field orientation="horizontal">
-																<FieldContent className="w-fit">
-																	<FieldTitle className="text-center">
-																		{option}
+																<FieldContent className="items-center">
+																	<FieldTitle>
+																		{option === 4 ? "4+" : String(option)}
 																	</FieldTitle>
 																</FieldContent>
 																<RadioGroupItem
 																	className="sr-only"
 																	id={`${field.name}-${option}`}
-																	value={option}
+																	value={String(option)}
+																/>
+															</Field>
+														</FieldLabel>
+													))}
+												</RadioGroup>
+												{isInvalid ? (
+													<FieldError errors={field.state.meta.errors} />
+												) : null}
+											</FieldContent>
+										</Field>
+									);
+								}}
+							</form.Field>
+							<form.Field name="bathrooms">
+								{(field) => {
+									const isInvalid =
+										field.state.meta.isTouched && !field.state.meta.isValid;
+									return (
+										<Field data-invalid={isInvalid}>
+											<FieldLabel htmlFor={field.name}>
+												Bathrooms (minimum)
+											</FieldLabel>
+											<FieldContent>
+												<RadioGroup
+													className="grid grid-cols-4 gap-2"
+													id={field.name}
+													name={field.name}
+													onValueChange={(value) =>
+														field.handleChange(Number(value))
+													}
+													value={
+														field.state.value === undefined
+															? undefined
+															: String(field.state.value)
+													}
+												>
+													{[1, 2, 3, 4].map((option) => (
+														<FieldLabel
+															htmlFor={`${field.name}-${option}`}
+															key={option}
+														>
+															<Field orientation="horizontal">
+																<FieldContent className="items-center">
+																	<FieldTitle>
+																		{option === 4 ? "4+" : String(option)}
+																	</FieldTitle>
+																</FieldContent>
+																<RadioGroupItem
+																	className="sr-only"
+																	id={`${field.name}-${option}`}
+																	value={String(option)}
 																/>
 															</Field>
 														</FieldLabel>
@@ -138,6 +203,48 @@ export function FilterDrawer() {
 								}}
 							</form.Field>
 						</FieldGroup>
+						<form.Field name="propType">
+							{(field) => {
+								const isInvalid =
+									field.state.meta.isTouched && !field.state.meta.isValid;
+								return (
+									<Field data-invalid={isInvalid}>
+										<FieldLabel htmlFor={field.name}>Property Type</FieldLabel>
+										<FieldContent>
+											<RadioGroup
+												className="flex flex-row flex-wrap items-center gap-2"
+												name={field.name}
+												onValueChange={(value) =>
+													field.handleChange(propertyTypeSchema.parse(value))
+												}
+												value={field.state.value}
+											>
+												{propertyTypeSchema.options.map((type) => (
+													<FieldLabel
+														className="has-[>[data-slot=field]]:w-fit has-[>[data-slot=field]]:flex-row"
+														htmlFor={`${field.name}-${type}`}
+														key={type}
+													>
+														<Field orientation="horizontal">
+															<RadioGroupItem
+																className="sr-only"
+																id={`${field.name}-${type}`}
+																value={type}
+															/>
+															<FieldContent>
+																<FieldTitle>
+																	{formatPropertyType(type)}
+																</FieldTitle>
+															</FieldContent>
+														</Field>
+													</FieldLabel>
+												))}
+											</RadioGroup>
+										</FieldContent>
+									</Field>
+								);
+							}}
+						</form.Field>
 						<FieldGroup className="grid grid-cols-2 gap-2">
 							<Button className="w-full" type="submit">
 								Apply

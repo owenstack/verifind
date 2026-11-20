@@ -1,5 +1,8 @@
 {
-  "references": [{ "path": "../../packages/api" }],
+  "references": [
+    { "path": "../../packages/shared" },
+    { "path": "../../packages/api" }
+  ],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,

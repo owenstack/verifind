@@ -6,33 +6,9 @@ import {
 	saveProperty,
 	unsaveProperty,
 } from "@verifind/db/queries/property";
+import { propertyListSchema } from "@verifind/shared";
 import z from "zod";
 import { protectedProcedure, publicProcedure } from "../../index";
-
-const propertyTypeSchema = z.enum([
-	"apartment",
-	"duplex",
-	"bungalow",
-	"self_contained",
-	"shared_apartment",
-	"studio",
-]);
-
-const statusSchema = z.enum(["available", "rented", "unavailable"]);
-
-const propertyListSchema = z.object({
-	q: z.string().max(120).optional(),
-	city: z.string().max(80).optional(),
-	propertyType: propertyTypeSchema.optional(),
-	minPrice: z.number().int().nonnegative().optional(),
-	maxPrice: z.number().int().positive().optional(),
-	bedrooms: z.number().int().min(0).max(20).optional(),
-	verifiedOnly: z.boolean().default(false),
-	status: statusSchema.optional(),
-	sort: z.enum(["newest", "price_asc", "price_desc"]).default("newest"),
-	limit: z.number().int().min(1).max(48).default(12),
-	offset: z.number().int().min(0).default(0),
-});
 
 export const propertiesRouter = {
 	list: publicProcedure

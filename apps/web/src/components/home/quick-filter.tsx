@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import type { PropertyType } from "@verifind/shared";
 import { Button } from "@verifind/ui/components/button";
 import { type MouseEvent, useCallback, useRef, useState } from "react";
 import { useStore } from "zustand";
@@ -7,18 +8,18 @@ import { cn } from "@/lib/utils";
 
 interface QuickFilter {
 	bedrooms?: number;
-	budget?: number;
 	label: string;
-	propertyType?: "apartment" | "duplex";
+	maxPrice?: number;
+	propType?: PropertyType;
 	verified?: boolean;
 }
 
 const quickFilters: QuickFilter[] = [
 	{ label: "Verified", verified: true },
-	{ label: "Apartments", propertyType: "apartment" },
-	{ label: "Duplexes", propertyType: "duplex" },
+	{ label: "Apartments", propType: "apartment" },
+	{ label: "Duplexes", propType: "duplex" },
 	{ label: "2+ Beds", bedrooms: 2 },
-	{ label: "Under ₦2M", budget: 2_000_000 },
+	{ label: "Under ₦2M", maxPrice: 2_000_000 },
 ];
 
 export function QuickFilter() {
