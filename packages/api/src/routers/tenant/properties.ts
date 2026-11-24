@@ -8,21 +8,19 @@ import {
 } from "@verifind/db/queries/property";
 import { propertyListSchema } from "@verifind/shared";
 import z from "zod";
-import { protectedProcedure, publicProcedure } from "../../index";
+import { protectedProcedure } from "../../index";
 
 export const propertiesRouter = {
-	list: publicProcedure
+	list: protectedProcedure
 		.input(propertyListSchema)
 		.handler(
 			async ({ context, input }) => await getProperties(context.db, input)
 		),
-
-	get: publicProcedure
+	get: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.handler(
 			async ({ context, input }) => await getPropertyById(context.db, input)
 		),
-
 	saved: {
 		list: protectedProcedure.handler(async ({ context }) => {
 			const userId = context.session.user.id;

@@ -107,6 +107,7 @@ export const propertyRelations = defineRelationsPart(
 			property: r.one.property({
 				from: r.savedProperty.propertyId,
 				to: r.property.id,
+				optional: false,
 			}),
 		},
 	})

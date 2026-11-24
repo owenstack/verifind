@@ -1,88 +1,135 @@
 import type { PropertyList } from "@verifind/shared";
-import { and, asc, desc, eq, gte, ilike, lte, or, sql } from "drizzle-orm";
+import { and, eq, gte, like, lte, or, type SQL, sql } from "drizzle-orm";
 import type { Database } from "../index";
 import { property, savedProperty } from "../schema";
 
 type GetPropertiesInput = PropertyList;
 
+/** Columns shared by the property cards and the property detail view. */
+const propertyCardColumns = {
+	id: true,
+	images: true,
+	propertyType: true,
+	title: true,
+	city: true,
+	state: true,
+	price: true,
+	pricePeriod: true,
+	verificationStatus: true,
+} as const;
+
+interface PropertyFilter {
+	bathrooms?: { gte: number };
+	bedrooms?: { gte: number };
+	city?: { like: string };
+	OR?: {
+		title?: { like: string };
+		city?: { like: string };
+		address?: { like: string };
+		description?: { like: string };
+	}[];
+	price?: { gte?: number; lte?: number };
+	propertyType?: string;
+	status: string;
+	verificationStatus?: string;
+}
+
+function getOrderBy(sort: GetPropertiesInput["sort"]) {
+	if (sort === "price_asc") {
+		return { price: "asc" } as const;
+	}
+	if (sort === "price_desc") {
+		return { price: "desc" } as const;
+	}
+	return { createdAt: "desc" } as const;
+}
+
 export async function getProperties(db: Database, input: GetPropertiesInput) {
-	const filters = [eq(property.status, input.status ?? "available")];
+	const status = input.status ?? "available";
+	const where: PropertyFilter = { status };
+	// `$count` only accepts SQL filters, so keep an equivalent SQL predicate in
+	// sync with the relational filter above for the total count.
+	const sqlFilters: SQL[] = [eq(property.status, status)];
+
 	if (input.q) {
 		const pattern = `%${input.q}%`;
 		const search = or(
-			ilike(property.title, pattern),
-			ilike(property.city, pattern),
-			ilike(property.address, pattern),
-			ilike(property.description, pattern)
+			like(property.title, pattern),
+			like(property.city, pattern),
+			like(property.address, pattern),
+			like(property.description, pattern)
 		);
 		if (search) {
-			filters.push(search);
+			sqlFilters.push(search);
 		}
+		where.OR = [
+			{ title: { like: pattern } },
+			{ city: { like: pattern } },
+			{ address: { like: pattern } },
+			{ description: { like: pattern } },
+		];
 	}
 	if (input.city) {
-		filters.push(ilike(property.city, `%${input.city}%`));
+		const cityPattern = `%${input.city}%`;
+		sqlFilters.push(like(property.city, cityPattern));
+		where.city = { like: cityPattern };
 	}
 	if (input.propType) {
-		filters.push(eq(property.propertyType, input.propType));
+		sqlFilters.push(eq(property.propertyType, input.propType));
+		where.propertyType = input.propType;
 	}
+	const priceFilter: { gte?: number; lte?: number } = {};
 	if (input.minPrice !== undefined) {
-		filters.push(gte(property.price, input.minPrice));
+		sqlFilters.push(gte(property.price, input.minPrice));
+		priceFilter.gte = input.minPrice;
 	}
 	if (input.maxPrice !== undefined) {
-		filters.push(lte(property.price, input.maxPrice));
+		sqlFilters.push(lte(property.price, input.maxPrice));
+		priceFilter.lte = input.maxPrice;
+	}
+	if (Object.keys(priceFilter).length > 0) {
+		where.price = priceFilter;
 	}
 	if (input.bedrooms !== undefined) {
-		filters.push(gte(property.bedrooms, input.bedrooms));
+		sqlFilters.push(gte(property.bedrooms, input.bedrooms));
+		where.bedrooms = { gte: input.bedrooms };
 	}
 	if (input.bathrooms !== undefined) {
-		filters.push(gte(property.bathrooms, input.bathrooms));
+		sqlFilters.push(gte(property.bathrooms, input.bathrooms));
+		where.bathrooms = { gte: input.bathrooms };
 	}
 	if (input.verified) {
-		filters.push(eq(property.verificationStatus, "verified"));
+		sqlFilters.push(eq(property.verificationStatus, "verified"));
+		where.verificationStatus = "verified";
 	}
 
-	const where = and(...filters);
-	let orderBy = desc(property.createdAt);
-	if (input.sort === "price_asc") {
-		orderBy = asc(property.price);
-	} else if (input.sort === "price_desc") {
-		orderBy = desc(property.price);
-	}
-	const [items, totals] = await Promise.all([
-		db
-			.select({
-				id: property.id,
-				images: property.images,
-				propertyType: property.propertyType,
-				title: property.title,
-				city: property.city,
-				state: property.state,
-				price: property.price,
-				pricePeriod: property.pricePeriod,
-				verificationStatus: property.verificationStatus,
-			})
-			.from(property)
-			.where(where)
-			.orderBy(orderBy)
-			.limit(input.limit)
-			.offset(input.offset),
-		db.select({ total: sql<number>`count(*)` }).from(property).where(where),
+	const sqlWhere = and(...sqlFilters) ?? sql`1 = 1`;
+	const orderBy = getOrderBy(input.sort);
+
+	const [items, total] = await Promise.all([
+		db.query.property.findMany({
+			where,
+			columns: propertyCardColumns,
+			orderBy,
+			limit: input.limit,
+			offset: input.offset,
+		}),
+		db.$count(property, sqlWhere),
 	]);
 
 	return {
 		items,
-		total: Number(totals[0]?.total ?? 0),
+		total,
 		limit: input.limit,
 		offset: input.offset,
 	};
 }
 
 export async function getPropertyById(db: Database, input: { id: string }) {
-	const [row] = await db
-		.select()
-		.from(property)
-		.where(eq(property.id, input.id))
-		.limit(1);
+	const row = await db.query.property.findFirst({
+		where: { id: input.id },
+		columns: propertyCardColumns,
+	});
 	if (!row) {
 		throw new Error("Property not found");
 	}
@@ -93,25 +140,19 @@ export async function listSavedProperties(
 	db: Database,
 	input: { userId: string }
 ) {
-	const items = await db
-		.select({
-			property: {
-				id: property.id,
-				images: property.images,
-				propertyType: property.propertyType,
-				title: property.title,
-				city: property.city,
-				state: property.state,
-				price: property.price,
-				pricePeriod: property.pricePeriod,
-				verificationStatus: property.verificationStatus,
-			},
-			savedAt: savedProperty.createdAt,
-		})
-		.from(savedProperty)
-		.innerJoin(property, eq(savedProperty.propertyId, property.id))
-		.where(eq(savedProperty.userId, input.userId))
-		.orderBy(desc(savedProperty.createdAt));
+	const items = await db.query.savedProperty.findMany({
+		where: { userId: input.userId },
+		orderBy: (table, { desc }) => desc(table.createdAt),
+		with: {
+			property: { columns: propertyCardColumns },
+		},
+		extras: {
+			savedAt: (table) =>
+				sql<number>`${table.createdAt}`.mapWith(
+					(value: number) => new Date(value)
+				),
+		},
+	});
 	return { items };
 }
 
@@ -119,10 +160,10 @@ export async function listSavedPropertyIds(
 	db: Database,
 	input: { userId: string }
 ) {
-	const rows = await db
-		.select({ propertyId: savedProperty.propertyId })
-		.from(savedProperty)
-		.where(eq(savedProperty.userId, input.userId));
+	const rows = await db.query.savedProperty.findMany({
+		where: { userId: input.userId },
+		columns: { propertyId: true },
+	});
 	return { ids: rows.map((row) => row.propertyId) };
 }
 
@@ -130,11 +171,10 @@ export async function saveProperty(
 	db: Database,
 	input: { userId: string; propertyId: string }
 ) {
-	const [exists] = await db
-		.select({ id: property.id })
-		.from(property)
-		.where(eq(property.id, input.propertyId))
-		.limit(1);
+	const exists = await db.query.property.findFirst({
+		where: { id: input.propertyId },
+		columns: { id: true },
+	});
 	if (!exists) {
 		throw new Error("Property not found");
 	}
