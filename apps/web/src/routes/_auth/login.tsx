@@ -111,10 +111,22 @@ function RouteComponent() {
 		onSubmit: ({ value }) => {
 			const { email } = value;
 			toast.promise(
-				emailOtp.sendVerificationOtp({
-					email,
-					type: "sign-in",
-				}),
+				emailOtp
+					.sendVerificationOtp({
+						email,
+						type: "sign-in",
+					})
+					// The better-auth client resolves `{ data, error }` instead of
+					// rejecting, so rethrow to reach the error toast below.
+					.then((result) => {
+						if (result.error) {
+							throw new Error(
+								result.error.message ??
+									"Couldn’t send your sign-in code. Check your email address and try again."
+							);
+						}
+						return result;
+					}),
 				{
 					loading: "Sending Sign-In Code…",
 					success: () => {

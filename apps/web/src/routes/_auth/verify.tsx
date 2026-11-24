@@ -184,7 +184,19 @@ function RouteComponent() {
 	const sendCode = (to: string) => {
 		setVerificationError(null);
 		toast.promise(
-			emailOtp.sendVerificationOtp({ email: to, type: "sign-in" }),
+			emailOtp
+				.sendVerificationOtp({ email: to, type: "sign-in" })
+				// The better-auth client resolves `{ data, error }` instead of
+				// rejecting, so rethrow to reach the error toast below.
+				.then((result) => {
+					if (result.error) {
+						throw new Error(
+							result.error.message ??
+								"Couldn’t send the code. Check the email address and try again."
+						);
+					}
+					return result;
+				}),
 			{
 				loading: "Sending Code…",
 				success: () => {
@@ -216,11 +228,20 @@ function RouteComponent() {
 
 			const name = `${value.firstName} ${value.lastName}`.trim();
 			toast.promise(
-				signIn.emailOtp({
-					email: value.email,
-					otp: value.otp,
-					...(type === "sign-up" && name ? { name } : {}),
-				}),
+				signIn
+					.emailOtp({
+						email: value.email,
+						otp: value.otp,
+						...(type === "sign-up" && name ? { name } : {}),
+					})
+					// The better-auth client resolves `{ data, error }` instead of
+					// rejecting, so rethrow to reach the error handler below.
+					.then((result) => {
+						if (result.error) {
+							throw new Error(getVerificationError(result.error));
+						}
+						return result;
+					}),
 				{
 					loading: "Verifying Code…",
 					success: () => {
