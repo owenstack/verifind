@@ -5,6 +5,14 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "@verifind/ui/components/button";
 import {
+	Drawer,
+	DrawerContent,
+	DrawerDescription,
+	DrawerFooter,
+	DrawerHeader,
+	DrawerTitle,
+} from "@verifind/ui/components/drawer";
+import {
 	Field,
 	FieldDescription,
 	FieldError,
@@ -20,15 +28,14 @@ import {
 	InputOTPSlot,
 } from "@verifind/ui/components/input-otp";
 import { toast } from "@verifind/ui/components/toast";
-import { BottomSheet } from "@verifind/ui/platform/bottom-sheet";
 import { useEffect, useState } from "react";
 import z from "zod";
 import { emailOtp, signIn } from "@/lib/auth-client";
 import {
 	dismissPasskeyOffer,
 	getBiometricLabel,
-	hasDismissedPasskeyOffer,
 	hasRegisteredPasskey,
+	isPasskeyOfferSuppressed,
 	isPlatformPasskeyAvailable,
 	registerPlatformPasskey,
 } from "@/lib/passkeys";
@@ -114,7 +121,7 @@ function RouteComponent() {
 	const [enablingPasskey, setEnablingPasskey] = useState(false);
 
 	const shouldOfferPasskeyRegistration = async () => {
-		if (hasDismissedPasskeyOffer()) {
+		if (isPasskeyOfferSuppressed()) {
 			return false;
 		}
 		if (!(await isPlatformPasskeyAvailable())) {
@@ -128,8 +135,7 @@ function RouteComponent() {
 		if (!passkeyOffer) {
 			return;
 		}
-		// “Not now” is remembered for good — the offer only ever appears on a
-		// first sign-in without a passkey, never as a recurring nag.
+		// “Not now” starts a cooldown; after a few dismissals we stop asking.
 		dismissPasskeyOffer();
 		const { redirectTo } = passkeyOffer;
 		setPasskeyOffer(null);
@@ -516,36 +522,43 @@ function RouteComponent() {
 					</FieldSet>
 				</div>
 			</div>
-			<BottomSheet
-				description={`Sign in next time with ${biometricLabel.toLowerCase()} instead of an emailed code.`}
+			<Drawer
 				onOpenChange={(open) => {
 					if (!open) {
 						handleOfferDismiss();
 					}
 				}}
 				open={passkeyOffer !== null}
-				title={`Turn on ${biometricLabel} sign-in?`}
 			>
-				<div className="grid gap-3 p-4">
-					<Button
-						className="h-12"
-						disabled={enablingPasskey}
-						onClick={handleEnablePasskey}
-						type="button"
-					>
-						{enablingPasskey ? "Setting Up…" : `Use ${biometricLabel}`}
-					</Button>
-					<Button
-						className="h-12"
-						disabled={enablingPasskey}
-						onClick={handleOfferDismiss}
-						type="button"
-						variant="ghost"
-					>
-						Not Now
-					</Button>
-				</div>
-			</BottomSheet>
+				<DrawerContent>
+					<DrawerHeader>
+						<DrawerTitle>Turn on {biometricLabel} sign-in?</DrawerTitle>
+						<DrawerDescription>
+							Sign in next time with {biometricLabel.toLowerCase()} instead of
+							an emailed code.
+						</DrawerDescription>
+					</DrawerHeader>
+					<DrawerFooter>
+						<Button
+							className="h-12"
+							disabled={enablingPasskey}
+							onClick={handleEnablePasskey}
+							type="button"
+						>
+							{enablingPasskey ? "Setting Up…" : `Use ${biometricLabel}`}
+						</Button>
+						<Button
+							className="h-12"
+							disabled={enablingPasskey}
+							onClick={handleOfferDismiss}
+							type="button"
+							variant="ghost"
+						>
+							Not Now
+						</Button>
+					</DrawerFooter>
+				</DrawerContent>
+			</Drawer>
 		</>
 	);
 }

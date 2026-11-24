@@ -1,6 +1,13 @@
 import { passkey, signIn } from "@/lib/auth-client";
 
-const PASSKEY_OFFER_DISMISSED_KEY = "verifind.passkey.offer-dismissed";
+const PASSKEY_OFFER_STATE_KEY = "verifind.passkey.offer-state";
+const PASSKEY_OFFER_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+const MAX_PASSKEY_OFFER_DISMISSALS = 3;
+
+interface PasskeyOfferState {
+	lastDismissedAt: number;
+	timesDismissed: number;
+}
 
 const IOS_USER_AGENT = /iPad|iPhone|iPod/;
 const MAC_USER_AGENT = /Macintosh/;
@@ -95,17 +102,58 @@ export async function hasRegisteredPasskey(): Promise<boolean> {
 	return !result.error && (result.data?.length ?? 0) > 0;
 }
 
-export function hasDismissedPasskeyOffer(): boolean {
+function readPasskeyOfferState(): PasskeyOfferState | null {
 	try {
-		return window.localStorage.getItem(PASSKEY_OFFER_DISMISSED_KEY) === "1";
+		const raw = window.localStorage.getItem(PASSKEY_OFFER_STATE_KEY);
+		if (!raw) {
+			return null;
+		}
+		const parsed: unknown = JSON.parse(raw);
+		if (
+			typeof parsed !== "object" ||
+			parsed === null ||
+			!("lastDismissedAt" in parsed) ||
+			!("timesDismissed" in parsed) ||
+			typeof parsed.lastDismissedAt !== "number" ||
+			typeof parsed.timesDismissed !== "number"
+		) {
+			return null;
+		}
+		return {
+			lastDismissedAt: parsed.lastDismissedAt,
+			timesDismissed: parsed.timesDismissed,
+		};
 	} catch {
+		return null;
+	}
+}
+
+/**
+ * True while the user has opted out of the passkey offer. “Not now” starts a
+ * cooldown rather than a permanent opt-out, but after a few dismissals we stop
+ * asking so the prompt never becomes a recurring nag.
+ */
+export function isPasskeyOfferSuppressed(): boolean {
+	const state = readPasskeyOfferState();
+	if (!state) {
 		return false;
 	}
+	return (
+		state.timesDismissed >= MAX_PASSKEY_OFFER_DISMISSALS ||
+		Date.now() - state.lastDismissedAt < PASSKEY_OFFER_COOLDOWN_MS
+	);
 }
 
 export function dismissPasskeyOffer(): void {
 	try {
-		window.localStorage.setItem(PASSKEY_OFFER_DISMISSED_KEY, "1");
+		const state = readPasskeyOfferState();
+		window.localStorage.setItem(
+			PASSKEY_OFFER_STATE_KEY,
+			JSON.stringify({
+				lastDismissedAt: Date.now(),
+				timesDismissed: (state?.timesDismissed ?? 0) + 1,
+			})
+		);
 	} catch {
 		// Storage unavailable (private mode): the offer will simply reappear.
 	}
