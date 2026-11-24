@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { buttonVariants } from "@verifind/ui/components/button";
 import { Logo } from "@/components/others/logo";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 
 export const Route = createFileRoute("/_auth/welcome")({
 	component: RouteComponent,
@@ -25,7 +25,7 @@ function RouteComponent() {
 						representatives directly.
 					</p>
 				</div>
-				<TransitionLink
+				<Link
 					className={buttonVariants({
 						variant: "secondary",
 						className: "w-full",
@@ -34,15 +34,15 @@ function RouteComponent() {
 					to="/signup"
 				>
 					Create Account
-				</TransitionLink>
+				</Link>
 				<p className="mt-5 text-primary-foreground/80 text-sm">
 					Already have an account?{" "}
-					<TransitionLink
+					<Link
 						className="font-semibold underline underline-offset-2"
 						to="/login"
 					>
 						Sign in
-					</TransitionLink>
+					</Link>
 				</p>
 			</div>
 		</div>

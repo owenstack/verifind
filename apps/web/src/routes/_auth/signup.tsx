@@ -18,7 +18,7 @@ import { toast } from "@verifind/ui/components/toast";
 import z from "zod";
 import { GoogleSignIn } from "@/components/others/google";
 import { emailOtp } from "@/lib/auth-client";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 
 export const Route = createFileRoute("/_auth/signup")({
 	component: RouteComponent,
@@ -135,9 +135,9 @@ function RouteComponent() {
 						<span className="text-muted-foreground">
 							Already have an account?
 						</span>
-						<TransitionLink className="font-medium text-primary" to="/login">
+						<Link className="font-medium text-primary" to="/login">
 							Sign In
-						</TransitionLink>
+						</Link>
 					</FieldDescription>
 				</FieldSet>
 				<FieldDescription className="mt-auto pt-6 text-center text-muted-foreground text-sm leading-6">

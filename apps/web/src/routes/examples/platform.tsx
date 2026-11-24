@@ -3,7 +3,7 @@ import { Button } from "@verifind/ui/components/button";
 import { AppBackButton } from "@verifind/ui/platform/app-back-button";
 import { BottomSheet } from "@verifind/ui/platform/bottom-sheet";
 import { useCallback, useState } from "react";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 import { useAppBack } from "@/platform/use-app-back";
 
 export const Route = createFileRoute("/examples/platform")({
@@ -70,13 +70,12 @@ function ShellExamplesPage() {
 					<Button onClick={goBack} type="button" variant="outline">
 						Go Back
 					</Button>
-					<TransitionLink
+					<Link
 						className="self-center text-primary text-sm underline"
-						to="/offline"
-						viewTransition
+						to="/examples/offline"
 					>
 						View Offline Example
-					</TransitionLink>
+					</Link>
 				</div>
 				<CodeExample>{`<BottomSheet open={open} onOpenChange={setOpen} title="…">\n  <DesignerContent />\n</BottomSheet>`}</CodeExample>
 			</section>

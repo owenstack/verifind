@@ -1,10 +1,10 @@
-import { Link } from "@tanstack/react-router";
 import type { PropertyType } from "@verifind/shared";
 import { Button } from "@verifind/ui/components/button";
 import { type MouseEvent, useCallback, useRef, useState } from "react";
 import { useStore } from "zustand";
 import { filterStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { Link } from "@/platform/transition-link";
 
 interface QuickFilter {
 	bedrooms?: number;

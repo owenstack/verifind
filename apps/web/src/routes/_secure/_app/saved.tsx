@@ -1,7 +1,7 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
 
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@verifind/ui/components/button";
 import {
 	Empty,
@@ -20,6 +20,7 @@ import {
 } from "@/components/others/property-card";
 import { TitleQuery } from "@/components/others/title-input";
 import { generateKeys } from "@/lib/constants";
+import { Link } from "@/platform/transition-link";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_secure/_app/saved")({

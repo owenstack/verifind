@@ -23,7 +23,7 @@ import { Locate, Search } from "lucide-react";
 import { useCallback, useState } from "react";
 import lgas from "@/assets/lga.json";
 import { getLgaLabel, type LGA, nearestLGA } from "@/lib/constants";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 
 // biome-ignore lint/suspicious/noExplicitAny: <@tanstack/react-form>
 export function ThirdStep({ form }: { form: any }) {
@@ -162,9 +162,9 @@ export function ThirdStep({ form }: { form: any }) {
 				}}
 			</form.Field>
 			<div className="flex items-center justify-between">
-				<TransitionLink className={buttonVariants({ variant: "link" })} to="/">
+				<Link className={buttonVariants({ variant: "link" })} to="/">
 					Skip For Now
-				</TransitionLink>
+				</Link>
 				<Button onClick={goToNextStep} size="lg" type="submit">
 					Finish Setup
 				</Button>

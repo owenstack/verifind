@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { getSession } from "@/lib/auth-client";
 import { readOfflineOwnerId } from "@/lib/offline-persistence";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 
 export const Route = createFileRoute("/examples/")({
 	beforeLoad: async () => {
@@ -54,7 +54,7 @@ function OverviewPage() {
 			</header>
 			<div className="grid gap-3">
 				{examples.map((example, index) => (
-					<TransitionLink
+					<Link
 						className="grid gap-2 rounded-lg border bg-card p-4 text-card-foreground transition-colors hover:bg-muted"
 						key={example.to}
 						to={example.to as string}
@@ -66,7 +66,7 @@ function OverviewPage() {
 						<span className="text-muted-foreground text-sm">
 							{example.description}
 						</span>
-					</TransitionLink>
+					</Link>
 				))}
 			</div>
 			<section

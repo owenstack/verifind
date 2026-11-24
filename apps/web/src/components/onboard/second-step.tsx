@@ -18,7 +18,7 @@ import { formatCurrency } from "@verifind/ui/lib/utils";
 import { useCallback } from "react";
 import { budgetLimits, onboarding } from "@/lib/constants";
 import { stepStore } from "@/lib/store";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 
 // biome-ignore lint/suspicious/noExplicitAny: <@tanstack/react-form>
 export function SecondStep({ form }: { form: any }) {
@@ -136,9 +136,9 @@ export function SecondStep({ form }: { form: any }) {
 				}}
 			</form.Field>
 			<div className="flex items-center justify-between">
-				<TransitionLink className={buttonVariants({ variant: "link" })} to="/">
+				<Link className={buttonVariants({ variant: "link" })} to="/">
 					Skip For Now
-				</TransitionLink>
+				</Link>
 				<Button onClick={goToNextStep} size="lg" type="button">
 					Continue
 				</Button>

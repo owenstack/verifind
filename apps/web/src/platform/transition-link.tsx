@@ -1,8 +1,13 @@
-import { Link } from "@tanstack/react-router";
-import type { ComponentProps } from "react";
+import {
+	type LinkComponent,
+	type LinkComponentProps,
+	Link as TanStackLink,
+} from "@tanstack/react-router";
 
-export type TransitionLinkProps = ComponentProps<typeof Link>;
+export type LinkProps = LinkComponentProps<"a">;
 
-export function TransitionLink(props: TransitionLinkProps) {
-	return <Link viewTransition {...props} />;
-}
+// Drop-in replacement for TanStack Router's Link that enables view transitions.
+// Typed as LinkComponent so `to`, `params`, `search`, etc. stay route-aware.
+export const Link: LinkComponent<"a"> = (props) => (
+	<TanStackLink viewTransition {...props} />
+);

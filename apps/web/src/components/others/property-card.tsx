@@ -1,7 +1,6 @@
 // biome-ignore-all lint/performance/noJsxPropsBind: filter chips bind inline setters
 
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
 import { Badge } from "@verifind/ui/components/badge";
 import { Button } from "@verifind/ui/components/button";
 import {
@@ -14,6 +13,7 @@ import { Skeleton } from "@verifind/ui/components/skeleton";
 import { toast } from "@verifind/ui/components/toast";
 import { Heart, ShieldCheck } from "lucide-react";
 import { formatPropertyType } from "@/lib/format";
+import { Link } from "@/platform/transition-link";
 import { orpc, queryClient } from "@/utils/orpc";
 
 interface PropertyPreview {

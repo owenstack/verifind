@@ -2,7 +2,7 @@
 
 import { Button, buttonVariants } from "@verifind/ui/components/button";
 import { Info, WifiOff } from "lucide-react";
-import { TransitionLink } from "@/platform/transition-link";
+import { Link } from "@/platform/transition-link";
 
 export function Offline() {
 	return (
@@ -29,7 +29,7 @@ export function Offline() {
 					>
 						Try Again
 					</Button>
-					<TransitionLink
+					<Link
 						className={buttonVariants({
 							size: "lg",
 							variant: "outline",
@@ -38,7 +38,7 @@ export function Offline() {
 						to="/saved"
 					>
 						View Saved Listings
-					</TransitionLink>
+					</Link>
 				</div>
 				<p className="flex items-start justify-center gap-2 text-muted-foreground text-sm leading-relaxed">
 					<Info className="mt-0.5 size-4 shrink-0 text-primary" />
