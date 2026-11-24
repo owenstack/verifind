@@ -15,9 +15,17 @@ import {
 } from "@verifind/ui/components/field";
 import { Input } from "@verifind/ui/components/input";
 import { toast } from "@verifind/ui/components/toast";
+import { FingerprintPattern, ScanFace } from "lucide-react";
+import { useEffect, useState } from "react";
 import z from "zod";
 import { GoogleSignIn } from "@/components/others/google";
 import { emailOtp } from "@/lib/auth-client";
+import {
+	getBiometricLabel,
+	isPlatformPasskeyAvailable,
+	signInWithPasskey,
+	startConditionalPasskeySignIn,
+} from "@/lib/passkeys";
 import { Link } from "@/platform/transition-link";
 
 export const Route = createFileRoute("/_auth/login")({
@@ -30,6 +38,67 @@ export const Route = createFileRoute("/_auth/login")({
 function RouteComponent() {
 	const navigate = useNavigate();
 	const { next } = Route.useSearch();
+	const biometricLabel = getBiometricLabel();
+	const [biometricsAvailable, setBiometricsAvailable] = useState(false);
+	const [passkeyLoading, setPasskeyLoading] = useState(false);
+
+	useEffect(() => {
+		let active = true;
+		const startConditionalSignIn = async () => {
+			const available = await isPlatformPasskeyAvailable();
+			if (!active) {
+				return;
+			}
+			setBiometricsAvailable(available);
+			if (!available) {
+				return;
+			}
+			// Offer the browser’s autofill passkey suggestion while the user
+			// focuses the email field. Silent when dismissed or unsupported.
+			if (await startConditionalPasskeySignIn()) {
+				if (!active) {
+					return;
+				}
+				toast.add({ title: "You’re signed in.", type: "success" });
+				navigate({ to: next ?? "/" });
+			}
+		};
+		startConditionalSignIn();
+		return () => {
+			active = false;
+		};
+	}, [navigate, next]);
+
+	const handlePasskeySignIn = async () => {
+		if (passkeyLoading) {
+			return;
+		}
+		setPasskeyLoading(true);
+		try {
+			const status = await signInWithPasskey();
+			if (status === "signed-in") {
+				toast.add({ title: "You’re signed in.", type: "success" });
+				await navigate({ to: next ?? "/" });
+			} else if (status === "no-passkey") {
+				toast.add({
+					description:
+						"No passkey was found on this device. Sign in with an email code instead.",
+					title: "No passkey found",
+					type: "error",
+				});
+			} else if (status === "failed") {
+				toast.add({
+					description: "Sign in with an email code instead.",
+					title: "Biometric sign-in failed",
+					type: "error",
+				});
+			}
+			// "cancelled": the user backed out of the biometric prompt — stay silent.
+		} finally {
+			setPasskeyLoading(false);
+		}
+	};
+
 	const form = useForm({
 		defaultValues: {
 			email: "",
@@ -78,6 +147,32 @@ function RouteComponent() {
 						</FieldDescription>
 					</div>
 					<FieldGroup className="gap-5">
+						{biometricsAvailable ? (
+							<>
+								<Button
+									className="h-11 w-full font-medium"
+									disabled={passkeyLoading}
+									onClick={handlePasskeySignIn}
+									variant="outline"
+								>
+									{passkeyLoading ? (
+										"Waiting for Biometrics…"
+									) : (
+										<span className="flex items-center gap-2">
+											{biometricLabel === "fingerprint" ? (
+												<FingerprintPattern className="size-4" />
+											) : (
+												<ScanFace className="size-4" />
+											)}
+											Use {biometricLabel}
+										</span>
+									)}
+								</Button>
+								<FieldSeparator className="text-muted-foreground text-xs">
+									OR
+								</FieldSeparator>
+							</>
+						) : null}
 						<form
 							className="w-full"
 							onSubmit={(e) => {
@@ -100,6 +195,7 @@ function RouteComponent() {
 												</FieldLabel>
 												<Input
 													aria-invalid={isInvalid}
+													autoComplete="username webauthn"
 													className="h-11"
 													id={field.name}
 													name={field.name}
