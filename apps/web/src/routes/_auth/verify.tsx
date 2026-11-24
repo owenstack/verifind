@@ -190,22 +190,17 @@ function RouteComponent() {
 	const sendCode = (to: string) => {
 		setVerificationError(null);
 		toast.promise(
-			emailOtp
-				.sendVerificationOtp({ email: to, type: "sign-in" })
-				// The better-auth client resolves `{ data, error }` instead of
-				// rejecting, so rethrow to reach the error toast below.
-				.then((result) => {
-					if (result.error) {
-						throw new Error(
-							result.error.message ??
-								"Couldn’t send the code. Check the email address and try again."
-						);
-					}
-					return result;
-				}),
+			emailOtp.sendVerificationOtp({ email: to, type: "sign-in" }),
 			{
 				loading: "Sending Code…",
-				success: () => {
+				success: (res) => {
+					if (res.error) {
+						return {
+							title: "Couldn’t send the code.",
+							description: res.error.message,
+							type: "error",
+						};
+					}
 					setCodeSent(true);
 					setResendCooldown(RESEND_COOLDOWN_SECONDS);
 					return "Check your email for a new code.";
@@ -234,23 +229,21 @@ function RouteComponent() {
 
 			const name = `${value.firstName} ${value.lastName}`.trim();
 			toast.promise(
-				signIn
-					.emailOtp({
-						email: value.email,
-						otp: value.otp,
-						...(type === "sign-up" && name ? { name } : {}),
-					})
-					// The better-auth client resolves `{ data, error }` instead of
-					// rejecting, so rethrow to reach the error handler below.
-					.then((result) => {
-						if (result.error) {
-							throw new Error(getVerificationError(result.error));
-						}
-						return result;
-					}),
+				signIn.emailOtp({
+					email: value.email,
+					otp: value.otp,
+					...(type === "sign-up" && name ? { name } : {}),
+				}),
 				{
 					loading: "Verifying Code…",
-					success: () => {
+					success: (res) => {
+						if (res.error) {
+							return {
+								title: "Couldn’t verify the code.",
+								description: res.error.message,
+								type: "error",
+							};
+						}
 						const redirectTo = next ?? (type === "sign-up" ? "/onboard" : "/");
 						if (type === "sign-in") {
 							// First sign-in on a biometric-capable device: offer to

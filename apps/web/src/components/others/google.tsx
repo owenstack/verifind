@@ -18,7 +18,16 @@ export function GoogleSignIn({ next }: { next?: string }) {
 				loading: "Signing You In…",
 				error:
 					"Couldn’t sign you in with Google. Check your connection and try again.",
-				success: "You’re signed in.",
+				success: (res) => {
+					if (res.error) {
+						return {
+							title: "Couldn’t sign you in.",
+							description: res.error.message,
+							type: "error",
+						};
+					}
+					return "You’re signed in.";
+				},
 			}
 		);
 		setLoading(false);
